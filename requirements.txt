@@ -1,0 +1,6 @@
+flask==3.0.3
+flask-mysqldb==2.0.0
+flask-wtf==1.2.1
+flask-login==0.6.3
+itsdangerous==2.2.0
+werkzeug==3.0.3

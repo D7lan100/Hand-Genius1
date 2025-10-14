@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contacto - Hand&Genius</title>
+
+  <!-- Bootstrap y Iconos -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+    }
+
+    /* Navbar */
+    .navbar-custom {
+      background: linear-gradient(90deg, #0080FF, #3399FF);
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    }
+    .navbar-custom .navbar-brand,
+    .navbar-custom .nav-link {
+      color: white !important;
+      font-weight: 500;
+    }
+    .navbar-custom .nav-link:hover {
+      color: #cce7ff !important;
+    }
+
+    /* Contenedor principal */
+    .container-contacto {
+      background: rgba(255,255,255,0.9);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+      margin-top: 30px;
+    }
+
+    .opcion {
+      background: linear-gradient(135deg, #0080FF, #3399FF);
+      color: white;
+      padding: 30px;
+      border-radius: 20px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 220px;
+    }
+    .opcion:hover {
+      transform: translateY(-5px);
+      background: linear-gradient(135deg, #0066CC, #2685E6);
+    }
+
+    .card-custom {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      margin-top: 25px;
+    }
+
+    input, textarea {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #99CCFF;
+      border-radius: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0080FF, #3399FF);
+      border: none;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0066CC, #2685E6);
+      transform: translateY(-2px);
+    }
+
+    .hidden { display: none; }
+
+    .redes a {
+      margin: 0 10px;
+      font-size: 30px;
+      color: #0080FF;
+      transition: 0.3s;
+    }
+    .redes a:hover { color: #0066cc; }
+
+    /* Chat */
+    .chat-box {
+      border: 1px solid #ccc;
+      border-radius: 15px;
+      height: 300px;
+      overflow-y: auto;
+      padding: 10px;
+      background: #f9f9f9;
+    }
+    .mensaje {
+      margin: 8px 0;
+      padding: 8px 12px;
+      border-radius: 10px;
+      display: inline-block;
+      max-width: 70%;
+    }
+    .usuario { background: #CCE6FF; }
+    .bot { background: #E6E6E6; }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-custom px-3">
+    <img src="{{ url_for('static', filename='img/logo2.png') }}" alt="Hand&Genius Logo" height="40" class="me-3">
+    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-3">
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('home_bp.home') }}">Inicio</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Suscripción</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Sugerencias</a></li>
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('navbar_bp.donaciones')}}">Donaciones</a></li>
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('navbar_bp.contacto')}}">Contacto</a></li>
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('navbar_bp.calendario') }}">Calendario</a></li>
+    </ul>
+
+    <!-- Iconos derecha -->
+    <div class="d-flex align-items-center">
+      <i class="bi bi-cart mx-3 fs-5"></i>
+      <!-- Dropdown usuario -->
+      <div class="dropdown">
+        <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-person-circle fs-4 me-2"></i>
+          <span class="fw-medium">{{ current_user.nombre_completo }}</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom" aria-labelledby="userDropdown">
+          <li>
+            <a class="dropdown-item" href={{ url_for('usuarios_bp.configuracion') }}>
+              <i class="bi bi-gear"></i>
+              Configuración de Perfil
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
+              <i class="bi bi-box-arrow-right"></i>
+              Cerrar Sesión
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+<!-- Contenido -->
+<div class="container container-contacto text-center">
+  <h3 class="mb-4 fw-bold text-primary">Sección de Contacto</h3>
+
+  <!-- Opciones -->
+  <div class="d-flex flex-wrap justify-content-center gap-4">
+    <div class="opcion" onclick="mostrar('form')">Documento de contacto</div>
+    <div class="opcion" onclick="mostrar('numero')">Número de contacto</div>
+    <div class="opcion" onclick="mostrar('pqr')">Enviar PQR</div>
+    <div class="opcion" onclick="mostrar('faq')">Preguntas frecuentes</div>
+    <div class="opcion" onclick="mostrar('chat')">Chat en vivo+</div>
+  </div>
+
+  <!-- Formulario -->
+  <div id="form" class="card-custom hidden text-start mt-4">
+    <h4>Formulario de contacto</h4>
+    <form id="formContacto">
+      <input type="text" id="nombre" placeholder="Nombre" required>
+      <input type="email" id="correo" placeholder="Correo electrónico" required>
+      <textarea id="mensaje" maxlength="2000" rows="5" placeholder="Escribe tu mensaje..." required></textarea>
+      <button type="submit" class="btn btn-primary mt-2">Enviar</button>
+    </form>
+    <p id="respuesta" class="hidden mt-3 text-success"></p>
+  </div>
+
+  <!-- Número de contacto -->
+  <div id="numero" class="card-custom hidden">
+    <h4>Atención Telefónica</h4>
+    <p id="telefono" class="fs-4 fw-bold">3135989198</p>
+    <button class="btn btn-primary" onclick="copiarNumero()">Copiar Número</button>
+    <p id="estado" class="mt-2"></p>
+    <div class="redes mt-3">
+      <a href="https://wa.me/573135989198" target="_blank"><i class="fab fa-whatsapp"></i></a>
+      <a href="https://instagram.com/handgeniusapp" target="_blank"><i class="fab fa-instagram"></i></a>
+      <a href="https://facebook.com/handgeniusapp" target="_blank"><i class="fab fa-facebook"></i></a>
+    </div>
+  </div>
+
+  <!-- PQR -->
+  <div id="pqr" class="card-custom hidden">
+    <h4>Enviar PQR</h4>
+    <textarea class="form-control" rows="5" placeholder="Describe tu petición, queja o reclamo..."></textarea>
+    <button class="btn btn-primary mt-2">Enviar PQR</button>
+  </div>
+
+  <!-- FAQ -->
+  <div id="faq" class="card-custom hidden text-start">
+    <h4>Preguntas Frecuentes</h4>
+    <p><strong>¿Horario de atención?</strong><br> Lunes a Sábado de 8 a.m a 6 p.m.</p>
+    <p><strong>¿Tiempo de respuesta?</strong><br> Máximo 48 horas hábiles.</p>
+  </div>
+
+  <!-- Chat -->
+  <div id="chat" class="card-custom hidden">
+    <h4>Chat en Vivo+</h4>
+    <div class="chat-box" id="chatBox">
+      <div class="mensaje bot">👋 ¡Hola! Bienvenido al chat de soporte. ¿En qué puedo ayudarte?</div>
+    </div>
+    <div class="d-flex mt-3">
+      <input type="text" id="inputChat" class="form-control" placeholder="Escribe tu mensaje...">
+      <button class="btn btn-primary ms-2" onclick="enviarMensaje()">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function mostrar(id) {
+  const secciones = ["form","numero","pqr","faq","chat"];
+  secciones.forEach(sec => document.getElementById(sec).classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+}
+
+function copiarNumero() {
+  const numero = document.getElementById("telefono").innerText;
+  navigator.clipboard.writeText(numero);
+  alert("Número copiado: " + numero);
+}
+
+function verificarHorario() {
+  const estado = document.getElementById("estado");
+  const ahora = new Date();
+  const dia = ahora.getDay();
+  const hora = ahora.getHours();
+  if (dia >= 1 && dia <= 6 && hora >= 8 && hora < 18) {
+    estado.innerText = "Disponible de Lunes a Sábado, 8 a.m - 6 p.m.";
+    estado.style.color = "green";
+  } else {
+    estado.innerText = "Fuera de servicio. Horario: Lunes a Sábado de 8 a.m a 6 p.m.";
+    estado.style.color = "red";
+  }
+}
+verificarHorario();
+
+document.getElementById("formContacto").addEventListener("submit", function(e){
+  e.preventDefault();
+  const nombre = document.getElementById("nombre").value.trim();
+  const correo = document.getElementById("correo").value.trim();
+  const mensaje = document.getElementById("mensaje").value.trim();
+  if (!nombre || !correo || !mensaje) { alert("Todos los campos son obligatorios."); return; }
+  if (!/^[^@]+@[^@]+\.[a-zA-Z]{2,}$/.test(correo)) { alert("Correo inválido."); return; }
+  document.getElementById("respuesta").innerText =
+    "Tu mensaje ha sido recibido. Responderemos en máximo 48 horas.";
+  document.getElementById("respuesta").classList.remove("hidden");
+  this.reset();
+});
+
+function enviarMensaje() {
+  const input = document.getElementById("inputChat");
+  const chatBox = document.getElementById("chatBox");
+  const mensaje = input.value.trim();
+  if (mensaje === "") return;
+  const msgUsuario = document.createElement("div");
+  msgUsuario.classList.add("mensaje","usuario");
+  msgUsuario.textContent = mensaje;
+  chatBox.appendChild(msgUsuario);
+  setTimeout(() => {
+    const msgBot = document.createElement("div");
+    msgBot.classList.add("mensaje","bot");
+    msgBot.textContent = "✅ Hemos recibido tu mensaje. Un asesor responderá pronto.";
+    chatBox.appendChild(msgBot);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }, 1000);
+  input.value = "";
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

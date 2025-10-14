@@ -1,0 +1,50 @@
+{% extends './base_no_nav.html' %}
+{% block title %}Verificar código{% endblock %}
+
+{% block customCSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container login-container">
+  <!-- Panel izquierdo -->
+  <div class="left-panel">
+    <img src="{{ url_for('static', filename='img/logo2.png')}}" alt="Logo" class="logo">
+    <p>
+      Ingresa el <strong>código de verificación</strong> que enviamos a tu correo.
+      El código expira en <strong>10 minutos</strong>.
+    </p>
+  </div>
+
+  <!-- Panel derecho -->
+  <div class="right-panel">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form class="form" method="POST" action="{{ url_for('auth_bp.verify_code') }}">
+      <h2 class="form-title">Verificar código</h2>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="email" value="{{ email }}">
+
+      <div class="mb-3">
+        <label for="codigo" class="form-label">Código</label>
+        <input type="text" id="codigo" name="codigo" placeholder="Ej: 123456" class="form-control" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Verificar</button>
+
+      <div class="extra-links mt-3 text-center">
+        <a href="{{ url_for('auth_bp.forgot_password') }}">¿No recibiste el código? Reintentar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

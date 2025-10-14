@@ -1,0 +1,91 @@
+{% extends './base_no_nav.html' %}
+
+{% block title %}Registro{% endblock %}
+
+{% block customCSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<body>
+  <div class="container">
+    <!-- Panel izquierdo -->
+    <div class="left-panel">
+      <img src="{{ url_for('static', filename='img/logo2.png')}}" alt="Logo" class="logo">
+      <p>
+        Únete a Hand & Genius y empieza a crear, comprar y regalar productos únicos y personalizados.
+      </p>
+    </div>
+
+    <!-- Panel derecho -->
+    <div class="right-panel">
+
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>{{ message }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="/register" class="form">
+        <h2>Registrarse</h2>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <label for="username">Nombre completo</label>
+        <input type="text" id="username" name="username" placeholder="Ingrese su nombre completo" required>
+
+        <label for="contact">Número de contacto</label>
+        <input type="text" id="contact" name="contact" placeholder="Ingrese su número de contacto" required>
+
+        <label for="email">Correo electrónico</label>
+        <input type="email" id="email" name="email" placeholder="Ingrese su correo electrónico" required>
+
+        <label for="password">Contraseña</label>
+        <div class="password-container">
+          <input type="password" id="password" name="password" placeholder="Ingrese su contraseña" required>
+          <button type="button" class="toggle" onclick="togglePassword('password')" title="Mostrar contraseña">
+            <i class="bi bi-eye-fill"></i>
+          </button>
+        </div>
+
+        <label for="password2">Verificar contraseña</label>
+        <div class="password-container">
+          <input type="password" id="password2" name="password2" placeholder="Repita su contraseña" required>
+          <button type="button" class="toggle" onclick="togglePassword('password2')" title="Mostrar contraseña">
+            <i class="bi bi-eye-fill"></i>
+          </button>
+        </div>
+
+        <button type="submit">Registrarse</button>
+        <a href="{{ url_for('auth_bp.login')}}">¿Ya tienes cuenta? Inicia sesión</a>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function togglePassword(fieldId) {
+      const passwordField = document.getElementById(fieldId);
+      const toggleButton = passwordField.nextElementSibling;
+      const icon = toggleButton.querySelector('i');
+
+      if (passwordField.type === "password") {
+        passwordField.type = "text";
+        icon.className = "bi bi-eye-slash-fill";
+        toggleButton.setAttribute("title", "Ocultar contraseña");
+      } else {
+        passwordField.type = "password";
+        icon.className = "bi bi-eye-fill";
+        toggleButton.setAttribute("title", "Mostrar contraseña");
+      }
+    }
+  </script>
+
+  <!-- Bootstrap JS (para que funcione el botón de cerrar alertas) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+{% endblock %}

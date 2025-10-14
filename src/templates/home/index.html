@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hand&Genius</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    /* Estilos base */
+    body { 
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh; 
+      margin: 0; 
+    }
+    
+    .navbar-custom { 
+      background: linear-gradient(90deg, #0080FF, #3399FF); 
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    }
+    
+    .navbar-custom .navbar-brand, .navbar-custom .nav-link { 
+      color: white !important; 
+      font-weight: 500;
+    }
+    
+    .navbar-brand img { 
+      filter: brightness(0) invert(1); 
+      transition: all 0.3s ease;
+    }
+    
+    .navbar-brand:hover img { 
+      transform: scale(1.05);
+    }
+    
+    .navbar-custom .nav-link:hover { 
+      color: #cce7ff !important;
+    }
+
+    /* CARRUSEL REDISEÑADO COMPLETAMENTE */
+    .carousel-section {
+      background: white;
+      padding: 60px 0;
+      margin-bottom: 40px;
+    }
+
+    .section-title {
+      color: #1a202c;
+      font-weight: 800;
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+
+    .section-subtitle {
+      color: #718096;
+      font-size: 18px;
+      margin-bottom: 50px;
+      font-weight: 400;
+    }
+
+    .carousel-product-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      height: 100%;
+      border: 1px solid #e2e8f0;
+    }
+
+    .carousel-product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .carousel-img-wrapper {
+      height: 240px;
+      overflow: hidden;
+      background: #f7fafc;
+      position: relative;
+    }
+
+    .carousel-product-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .carousel-product-card .no-image-placeholder {
+      font-size: 60px;
+      color: #cbd5e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .carousel-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #e53e3e;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .carousel-card-body {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .carousel-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 12px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .carousel-card-price {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0080FF;
+      margin-bottom: 12px;
+    }
+
+    .carousel-rating {
+      color: #fbbf24;
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+
+    .carousel-rating .rating-text {
+      color: #718096;
+      font-size: 14px;
+      margin-left: 6px;
+    }
+
+    .carousel-btn {
+      background: #0080FF;
+      color: white;
+      border: none;
+      padding: 10px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+
+    .carousel-btn:hover {
+      background: #0066cc;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+      width: 48px;
+      height: 48px;
+      background: white;
+      border-radius: 50%;
+      opacity: 1;
+      border: 1px solid #e2e8f0;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .carousel-control-prev:hover,
+    .carousel-control-next:hover {
+      background: #0080FF;
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      filter: invert(1);
+    }
+
+    .carousel-control-prev:hover .carousel-control-prev-icon,
+    .carousel-control-next:hover .carousel-control-next-icon {
+      filter: invert(0);
+    }
+
+    /* Estadísticas */
+    .stats-section {
+      background: white;
+      padding: 40px 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .stat-number {
+      font-size: 42px;
+      font-weight: 800;
+      color: #0080FF;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      color: #718096;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    /* Categorías */
+    .categories-section {
+      background: white;
+      padding: 40px 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .category-card {
+      background: #f7fafc;
+      border-radius: 12px;
+      padding: 30px 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 2px solid transparent;
+      height: 100%;
+    }
+
+    .category-card:hover {
+      transform: translateY(-4px);
+      border-color: #0080FF;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0,128,255,0.15);
+    }
+
+    .category-icon {
+      font-size: 48px;
+      color: #0080FF;
+      margin-bottom: 15px;
+    }
+
+    .category-name {
+      color: #2d3748;
+      font-weight: 600;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .category-count {
+      color: #718096;
+      font-size: 14px;
+    }
+
+    /* Beneficios */
+    .benefits-section {
+      background: linear-gradient(135deg, #0080FF, #3399FF);
+      color: white;
+      padding: 50px 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+    }
+
+    .benefit-card {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 30px 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255,255,255,0.2);
+      height: 100%;
+    }
+
+    .benefit-card:hover {
+      background: rgba(255,255,255,0.25);
+      transform: translateY(-4px);
+    }
+
+    .benefit-icon {
+      font-size: 40px;
+      margin-bottom: 15px;
+      color: white;
+    }
+
+    .benefit-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .benefit-text {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    /* Productos */
+    .product-card { 
+      background: white;
+      padding: 25px 20px;
+      text-align: center;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      border: 1px solid #e2e8f0;
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .product-card:hover { 
+      transform: translateY(-8px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    }
+
+    .product-image-container {
+      position: relative;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f7fafc;
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-image {
+      transform: scale(1.05);
+    }
+
+    .no-image-placeholder {
+      color: #cbd5e0;
+      font-size: 48px;
+    }
+
+    .product-category {
+      background: #0080FF;
+      color: white !important;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+
+    .product-name {
+      color: #2d3748 !important;
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .product-price {
+      color: #0080FF !important;
+      font-weight: 800;
+      font-size: 22px;
+      margin-bottom: 15px;
+    }
+
+    .product-status {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: 15px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .status-available {
+      background: #48bb78;
+      color: white;
+    }
+
+    .status-unavailable {
+      background: #f56565;
+      color: white;
+    }
+
+    .status-customizable {
+      background: #ed8936;
+      color: white;
+    }
+
+    .btn-vermas { 
+      background: #0080FF;
+      color: white !important;
+      padding: 10px 25px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 12px;
+    }
+
+    .btn-vermas:hover { 
+      background: #0066CC;
+      transform: translateY(-2px);
+      color: white !important;
+    }
+
+    /* Otros estilos */
+    .tabs-custom { 
+      margin: 30px 0; 
+      text-align: center;
+    }
+    
+    .tabs-custom button { 
+      margin: 0 15px; 
+      border-radius: 25px; 
+      border: 2px solid #0080FF; 
+      background: white; 
+      padding: 12px 30px; 
+      font-weight: 500; 
+      color: #0080FF; 
+      transition: all 0.3s ease;
+    }
+    
+    .tabs-custom button:hover { 
+      background: #0080FF; 
+      color: white; 
+      transform: translateY(-2px); 
+    }
+    
+    .main-title { 
+      color: #333; 
+      font-weight: 600; 
+      margin-bottom: 10px;
+    }
+    
+    .main-description { 
+      color: #666; 
+      font-size: 16px;
+    }
+    
+    .container { 
+      background: transparent;
+      padding: 30px; 
+      border-radius: 20px; 
+      margin-top: 20px;
+    }
+    
+    .btn-login { 
+      border-radius: 20px !important; 
+      padding: 8px 16px !important; 
+      font-weight: 500 !important; 
+      transition: all 0.3s ease !important; 
+      border: 1px solid white !important; 
+      color: white !important; 
+      background: transparent !important;
+    }
+    
+    .btn-login:hover { 
+      background-color: rgba(255,255,255,0.2) !important; 
+      transform: translateY(-1px); 
+      color: white !important;
+    }
+    
+    .btn-register { 
+      border-radius: 20px !important; 
+      padding: 8px 16px !important; 
+      font-weight: 500 !important; 
+      transition: all 0.3s ease !important; 
+      background-color: white !important; 
+      color: #0080FF !important; 
+      border: 1px solid white !important;
+    }
+    
+    .btn-register:hover { 
+      background-color: #f8f9fa !important; 
+      transform: translateY(-1px); 
+      color: #0080FF !important;
+    }
+
+    .dropdown-menu {
+      background-color: white !important;
+      border: 1px solid rgba(0,0,0,0.15) !important;
+      border-radius: 10px !important;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+      margin-top: 8px !important;
+      min-width: 150px !important;
+    }
+
+    .dropdown-item {
+      color: #333 !important;
+      padding: 8px 16px !important;
+      font-weight: 500 !important;
+      transition: all 0.2s ease !important;
+    }
+
+    .dropdown-item:hover {
+      background-color: #f8f9fa !important;
+      color: #0080FF !important;
+    }
+
+    .no-products {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 15px;
+      padding: 40px;
+    }
+
+    /* FOOTER */
+    .footer {
+      background: linear-gradient(90deg, #0080FF, #3399FF);
+      color: white;
+      padding: 50px 0 20px;
+      margin-top: 60px;
+    }
+
+    .footer-title {
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    .footer-link {
+      color: white;
+      text-decoration: none;
+      opacity: 0.9;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .footer-link:hover {
+      opacity: 1;
+      color: white;
+      padding-left: 5px;
+    }
+
+    .footer-social {
+      color: white;
+      font-size: 24px;
+      margin-right: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .footer-social:hover {
+      opacity: 0.7;
+      transform: translateY(-3px);
+    }
+
+    .footer-text {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 10px;
+    }
+
+    .footer-divider {
+      border-color: rgba(255,255,255,0.3);
+      margin: 30px 0;
+    }
+
+    .footer-copyright {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <!-- Barra de navegación -->
+  <nav class="navbar navbar-expand-lg navbar-custom px-3">
+    <img src="{{ url_for('static', filename='img/logo2.png') }}" alt="Hand&Genius Logo" height="40">
+    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-3">
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('home_bp.index') }}">Inicio</a></li>
+      <li class="nav-item"><a class="nav-link" href="">Suscripción</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Sugerencias</a></li> 
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('navbar_bp.donaciones')}}">Donaciones</a></li>
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('navbar_bp.contacto')}}">Contacto</a></li>
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('navbar_bp.calendario') }}">Calendario</a></li>
+    </ul>
+
+    <div class="d-flex align-items-center">
+      <div class="d-flex gap-2">
+        <button class="btn btn-login" type="button" onclick="window.location.href='{{ url_for('auth_bp.login') }}'">
+          <i class="bi bi-person"></i> Iniciar Sesión
+        </button>
+        <button class="btn btn-register" type="button" onclick="window.location.href='{{ url_for('auth_bp.register') }}'">
+          <i class="bi bi-person-plus"></i> Registrarse
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido principal -->
+  <div class="container my-4">
+    <h5 class="main-title text-center"><strong>Bienvenidos a Hand&Genius</strong></h5>
+    <p class="main-description text-center">Aplicativo web pensado especialmente para personas jóvenes como tú, que les interese brindar regalos creativos y personalizados.</p>
+
+    <!-- CARRUSEL DE PRODUCTOS DESTACADOS -->
+    <div class="carousel-section">
+      <div class="container">
+        <h3 class="section-title text-center">Productos Destacados</h3>
+        <p class="section-subtitle text-center">Los más populares de esta semana</p>
+        
+        <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner">
+            {% if productos and productos|length > 0 %}
+              {% set productos_destacados = productos[:9] %}
+              
+              {% for i in range(0, productos_destacados|length, 3) %}
+              <div class="carousel-item {% if loop.first %}active{% endif %}">
+                <div class="row g-4">
+                  {% for producto in productos_destacados[i:i+3] %}
+                  <div class="col-md-4">
+                    <div class="carousel-product-card">
+                      <div class="carousel-img-wrapper">
+                        {% if loop.index0 < 3 %}
+                        <span class="carousel-badge">HOT</span>
+                        {% endif %}
+                        {% if producto.imagen %}
+                          <img src="{{ producto.imagen }}" alt="{{ producto.nombre }}">
+                        {% else %}
+                          <div class="no-image-placeholder">
+                            <i class="bi bi-gift"></i>
+                          </div>
+                        {% endif %}
+                      </div>
+                      <div class="carousel-card-body">
+                        <h5 class="carousel-card-title">{{ producto.nombre }}</h5>
+                        <div class="carousel-card-price">${{ "{:,.0f}".format(producto.precio) }}</div>
+                        {% if producto.calificacion_promedio %}
+                        <div class="carousel-rating">
+                          {% for star in range(5) %}
+                            {% if star < producto.calificacion_promedio|int %}★{% else %}<span style="color: #e2e8f0;">★</span>{% endif %}
+                          {% endfor %}
+                          <span class="rating-text">({{ "%.1f"|format(producto.calificacion_promedio) }})</span>
+                        </div>
+                        {% endif %}
+                        <a href="{{ url_for('productos_bp.detalle_producto', id=producto.id_producto) }}" class="carousel-btn">Ver más</a>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="carousel-item active">
+                <div class="row g-4">
+                  <div class="col-md-4">
+                    <div class="carousel-product-card">
+                      <div class="carousel-img-wrapper">
+                        <span class="carousel-badge">HOT</span>
+                        <div class="no-image-placeholder"><i class="bi bi-gift"></i></div>
+                      </div>
+                      <div class="carousel-card-body">
+                        <h5 class="carousel-card-title">Producto Ejemplo 1</h5>
+                        <div class="carousel-card-price">$15,990</div>
+                        <div class="carousel-rating">★★★★★ <span class="rating-text">(5.0)</span></div>
+                        <button class="carousel-btn">Ver más</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="carousel-product-card">
+                      <div class="carousel-img-wrapper">
+                        <span class="carousel-badge">HOT</span>
+                        <div class="no-image-placeholder"><i class="bi bi-heart"></i></div>
+                      </div>
+                      <div class="carousel-card-body">
+                        <h5 class="carousel-card-title">Producto Ejemplo 2</h5>
+                        <div class="carousel-card-price">$25,990</div>
+                        <div class="carousel-rating">★★★★<span style="color: #e2e8f0;">★</span> <span class="rating-text">(4.5)</span></div>
+                        <button class="carousel-btn">Ver más</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="carousel-product-card">
+                      <div class="carousel-img-wrapper">
+                        <span class="carousel-badge">HOT</span>
+                        <div class="no-image-placeholder"><i class="bi bi-palette"></i></div>
+                      </div>
+                      <div class="carousel-card-body">
+                        <h5 class="carousel-card-title">Producto Ejemplo 3</h5>
+                        <div class="carousel-card-price">$35,990</div>
+                        <div class="carousel-rating">★★★★★ <span class="rating-text">(4.8)</span></div>
+                        <button class="carousel-btn">Ver más</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+          
+          <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="stats-section">
+      <div class="row">
+        <div class="col-md-3 col-6">
+          <div class="stat-item">
+            <div class="stat-number">{{ total_productos|default(0) }}+</div>
+            <div class="stat-label">Productos</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="stat-item">
+            <div class="stat-number">{{ total_usuarios|default(0) }}+</div>
+            <div class="stat-label">Clientes Felices</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="stat-item">
+            <div class="stat-number">98%</div>
+            <div class="stat-label">Satisfacción</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="stat-item">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Atención</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categorías -->
+    <div class="categories-section">
+      <h3 class="section-title text-center">Explora por Categorías</h3>
+      <p class="section-subtitle text-center">Encuentra exactamente lo que buscas</p>
+      
+      <div class="row g-3">
+        {% if categorias and categorias|length > 0 %}
+          {% for categoria in categorias[:4] %}
+          <div class="col-md-3 col-6">
+            <div class="category-card" onclick="window.location.href='{{ url_for('productos_bp.productos') }}?categoria={{ categoria.id_categoria }}'">
+              <div class="category-icon">
+                {% if 'regalo' in categoria.nombre.lower() %}
+                  <i class="bi bi-gift-fill"></i>
+                {% elif 'arte' in categoria.nombre.lower() %}
+                  <i class="bi bi-palette-fill"></i>
+                {% elif 'personaliz' in categoria.nombre.lower() %}
+                  <i class="bi bi-heart-fill"></i>
+                {% else %}
+                  <i class="bi bi-star-fill"></i>
+                {% endif %}
+              </div>
+              <div class="category-name">{{ categoria.nombre }}</div>
+              <div class="category-count">{{ categoria.total_productos|default(0) }} productos</div>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="col-md-3 col-6">
+            <div class="category-card">
+              <div class="category-icon"><i class="bi bi-gift-fill"></i></div>
+              <div class="category-name">Regalos</div>
+              <div class="category-count">Ver productos</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="category-card">
+              <div class="category-icon"><i class="bi bi-palette-fill"></i></div>
+              <div class="category-name">Artesanías</div>
+              <div class="category-count">Ver productos</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="category-card">
+              <div class="category-icon"><i class="bi bi-heart-fill"></i></div>
+              <div class="category-name">Personalizados</div>
+              <div class="category-count">Ver productos</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="category-card">
+              <div class="category-icon"><i class="bi bi-star-fill"></i></div>
+              <div class="category-name">Premium</div>
+              <div class="category-count">Ver productos</div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Beneficios -->
+    <div class="benefits-section">
+      <h3 class="section-title text-center">¿Por qué elegir Hand&Genius?</h3>
+      <p class="section-subtitle text-center mb-4">Beneficios que nos hacen únicos</p>
+      
+      <div class="row g-3">
+        <div class="col-md-3 col-6">
+          <div class="benefit-card">
+            <div class="benefit-icon"><i class="bi bi-truck"></i></div>
+            <div class="benefit-title">Envío Gratis</div>
+            <div class="benefit-text">En compras mayores a $50.000</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="benefit-card">
+            <div class="benefit-icon"><i class="bi bi-shield-check"></i></div>
+            <div class="benefit-title">Compra Segura</div>
+            <div class="benefit-text">Protegemos tus datos</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="benefit-card">
+            <div class="benefit-icon"><i class="bi bi-arrow-repeat"></i></div>
+            <div class="benefit-title">Devoluciones</div>
+            <div class="benefit-text">30 días para devolver</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="benefit-card">
+            <div class="benefit-icon"><i class="bi bi-headset"></i></div>
+            <div class="benefit-title">Soporte 24/7</div>
+            <div class="benefit-text">Siempre listos para ayudarte</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-custom">
+      <button>Fabricación</button>
+      <button onclick="window.location.href='{{ url_for('productos_bp.productos') }}'">Venta</button>
+    </div>
+
+    <!-- Mostrar productos disponibles -->
+    {% if productos and productos|length > 0 %}
+      <div style="background: white; padding: 40px 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h3 class="section-title text-center">Todos los Productos</h3>
+        <div class="mb-3 text-center">
+          <p class="text-muted">Mostrando {{ productos|length }} productos disponibles</p>
+        </div>
+        
+        <!-- Productos dinámicos -->
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
+          {% for producto in productos %}
+          <div class="col">
+            <div class="product-card">
+              <!-- Imagen del producto -->
+              <div class="product-image-container">
+                {% if producto.imagen %}
+                  <img src="{{ producto.imagen }}" 
+                       alt="{{ producto.nombre }}" 
+                       class="product-image">
+                {% else %}
+                  <i class="bi bi-image no-image-placeholder"></i>
+                {% endif %}
+              </div>
+              
+              <!-- Categoría del producto -->
+              <div class="product-category">Producto</div>
+              
+              <!-- Nombre del producto -->
+              <div class="product-name">{{ producto.nombre }}</div>
+              
+              <!-- Precio -->
+              <div class="product-price">${{ "%.2f"|format(producto.precio) }}</div>
+              
+              <!-- Estados del producto -->
+              <div class="product-status">
+                {% if producto.disponible %}
+                  <span class="status-badge status-available">✓ Disponible</span>
+                {% else %}
+                  <span class="status-badge status-unavailable">✗ No disponible</span>
+                {% endif %}
+                
+                {% if producto.es_personalizable %}
+                  <span class="status-badge status-customizable">🎨 Personalizable</span>
+                {% endif %}
+              </div>
+              
+              <!-- Botón ver más -->
+              <a href="{{ url_for('productos_bp.detalle_producto', id=producto.id_producto) }}" 
+                 class="btn-vermas">
+                 Ver más
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        
+        <!-- Botón para ver todos los productos -->
+        <div class="mt-4 text-center">
+          <a href="{{ url_for('productos_bp.productos') }}" class="btn btn-outline-primary btn-lg">
+            Ver todos los productos
+          </a>
+        </div>
+      </div>
+      
+    {% else %}
+      <!-- Mensaje cuando no hay productos -->
+      <div style="background: white; padding: 40px 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div class="alert no-products mt-4">
+          <h5>No hay productos disponibles</h5>
+          <p class="mb-0">Próximamente tendremos productos increíbles para ti.</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <!-- Columna 1: Sobre Hand&Genius -->
+        <div class="col-md-3 col-6 mb-4">
+          <h5 class="footer-title">
+            <i class="bi bi-heart-fill"></i> Hand&Genius
+          </h5>
+          <p class="footer-text">
+            Tu destino para regalos creativos y personalizados. Transformamos ideas en experiencias únicas.
+          </p>
+          <div class="mt-3">
+            <a href="#" class="footer-social"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="footer-social"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="footer-social"><i class="bi bi-twitter"></i></a>
+            <a href="#" class="footer-social"><i class="bi bi-whatsapp"></i></a>
+          </div>
+        </div>
+
+        <!-- Columna 2: Enlaces Rápidos -->
+        <div class="col-md-3 col-6 mb-4">
+          <h5 class="footer-title">
+            <i class="bi bi-link-45deg"></i> Enlaces Rápidos
+          </h5>
+          <a href="{{ url_for('home_bp.index') }}" class="footer-link">
+            <i class="bi bi-chevron-right"></i> Inicio
+          </a>
+          <a href="{{ url_for('productos_bp.buscar_productos') }}" class="footer-link">
+            <i class="bi bi-chevron-right"></i> Productos
+          </a>
+          <a href="{{ url_for('navbar_bp.calendario') }}" class="footer-link">
+            <i class="bi bi-chevron-right"></i> Calendario
+          </a>
+          <a href="{{ url_for('navbar_bp.donaciones') }}" class="footer-link">
+            <i class="bi bi-chevron-right"></i> Donaciones
+          </a>
+        </div>
+
+        <!-- Columna 3: Cuenta -->
+        <div class="col-md-3 col-6 mb-4">
+          <h5 class="footer-title">
+            <i class="bi bi-person-circle"></i> Mi Cuenta
+          </h5>
+          <a href="{{ url_for('auth_bp.login') }}" class="footer-link">
+            <i class="bi bi-chevron-right"></i> Iniciar Sesión
+          </a>
+          <a href="{{ url_for('auth_bp.register') }}" class="footer-link">
+            <i class="bi bi-chevron-right"></i> Registrarse
+          </a>
+          <a href="#" class="footer-link">
+            <i class="bi bi-chevron-right"></i> Mis Pedidos
+          </a>
+          <a href="#" class="footer-link">
+            <i class="bi bi-chevron-right"></i> Suscripción
+          </a>
+        </div>
+
+        <!-- Columna 4: Contacto -->
+        <div class="col-md-3 col-6 mb-4">
+          <h5 class="footer-title">
+            <i class="bi bi-envelope-fill"></i> Contacto
+          </h5>
+          <p class="footer-text">
+            <i class="bi bi-geo-alt-fill"></i> Bogotá, Colombia
+          </p>
+          <p class="footer-text">
+            <i class="bi bi-telephone-fill"></i> +57 300 123 4567
+          </p>
+          <p class="footer-text">
+            <i class="bi bi-envelope-fill"></i> info@handgenius.com
+          </p>
+          <p class="footer-text">
+            <i class="bi bi-clock-fill"></i> Lun - Vie: 8am - 6pm
+          </p>
+        </div>
+      </div>
+
+      <!-- Línea divisoria -->
+      <hr class="footer-divider">
+
+      <!-- Copyright y métodos de pago -->
+      <div class="row align-items-center">
+        <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+          <p class="footer-copyright mb-0">
+            © 2025 <strong>Hand&Genius</strong>. Todos los derechos reservados.
+          </p>
+        </div>
+        <div class="col-md-6 text-center text-md-end">
+          <span class="footer-text d-inline me-2">Métodos de pago:</span>
+          <i class="bi bi-credit-card-fill" style="font-size: 24px; margin-right: 10px;"></i>
+          <i class="bi bi-wallet-fill" style="font-size: 24px; margin-right: 10px;"></i>
+          <i class="bi bi-cash" style="font-size: 24px;"></i>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

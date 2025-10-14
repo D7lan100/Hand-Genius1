@@ -1,0 +1,136 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Detalle del Pedido #{{ pedido.id_pedido }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Pedido #{{ pedido.id_pedido }}</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{{ url_for('admin_pedidos') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Información del pedido -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Información del Pedido</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Cliente:</strong> {{ pedido.nombre_completo }}</p>
+                        <p><strong>Email:</strong> {{ pedido.correo_electronico }}</p>
+                        <p><strong>Teléfono:</strong> {{ pedido.telefono or 'N/A' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Fecha:</strong> {{ pedido.fecha_pedido.strftime('%d/%m/%Y %H:%M') if pedido.fecha_pedido else '' }}</p>
+                        <p><strong>Método de pago:</strong> {{ pedido.metodo_pago or 'N/A' }}</p>
+                        <p><strong>Estado actual:</strong> 
+                            <span class="badge bg-{{ {
+                                'pendiente': 'warning',
+                                'procesando': 'info', 
+                                'enviado': 'primary',
+                                'entregado': 'success',
+                                'cancelado': 'danger'
+                            }.get(pedido.estado, 'secondary') }}">
+                                {{ pedido.estado|title }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Productos del pedido -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Productos</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio Total</th>
+                                <th>Instrucciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set total_general = 0 %}
+                            {% for detalle in detalles %}
+                            <tr>
+                                <td>{{ detalle.producto_nombre }}</td>
+                                <td>{{ detalle.cantidad }}</td>
+                                <td>${{ "%.2f"|format(detalle.precio_total or 0) }}</td>
+                                <td>{{ detalle.instrucciones or 'N/A' }}</td>
+                            </tr>
+                            {% set total_general = total_general + (detalle.precio_total or 0) %}
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-active">
+                                <th colspan="2">Total del Pedido:</th>
+                                <th>${{ "%.2f"|format(total_general) }}</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Cambiar estado del pedido -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Cambiar Estado</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin_cambiar_estado_pedido', id=pedido.id_pedido) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div class="mb-3">
+                        <label for="estado" class="form-label">Nuevo Estado:</label>
+                        <select class="form-select" name="estado" required>
+                            <option value="">Seleccionar estado</option>
+                            <option value="pendiente" {% if pedido.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                            <option value="procesando" {% if pedido.estado == 'procesando' %}selected{% endif %}>Procesando</option>
+                            <option value="enviado" {% if pedido.estado == 'enviado' %}selected{% endif %}>Enviado</option>
+                            <option value="entregado" {% if pedido.estado == 'entregado' %}selected{% endif %}>Entregado</option>
+                            <option value="cancelado" {% if pedido.estado == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-save"></i> Actualizar Estado
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Información de envío -->
+        {% if domicilio %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Información de Envío</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Dirección:</strong><br>{{ domicilio.direccion_envio or 'N/A' }}</p>
+                <p><strong>Transportadora:</strong> {{ domicilio.empresa_transportadora or 'N/A' }}</p>
+                <p><strong>Estado envío:</strong> {{ domicilio.estado or 'N/A' }}</p>
+                {% if domicilio.fecha_envio %}
+                <p><strong>Fecha envío:</strong> {{ domicilio.fecha_envio.strftime('%d/%m/%Y') }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

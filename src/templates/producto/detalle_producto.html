@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}{{ producto.nombre }} - HandiGenius{% endblock %}
+
+{% block content %}
+<style>
+  .product-detail-container {
+    background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,249,250,0.9));
+    border-radius: 25px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.08);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.8);
+    margin-top: 20px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .product-detail-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0080FF, #3399FF, #66B2FF);
+  }
+
+  .product-image {
+    width: 100%;
+    max-height: 500px;
+    object-fit: cover;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  }
+
+  .product-title {
+    color: #2d3748;
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #0080FF, #3399FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .product-price {
+    color: #0080FF;
+    font-weight: 800;
+    font-size: 2rem;
+    margin-bottom: 15px;
+    text-shadow: 0 2px 4px rgba(0,128,255,0.1);
+  }
+
+  .stock-info {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 15px;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(72,187,120,0.3);
+  }
+
+  .stock-info.no-stock {
+    background: linear-gradient(135deg, #f56565, #e53e3e);
+    box-shadow: 0 4px 15px rgba(245,101,101,0.3);
+  }
+
+  .btn-back, .btn-add-cart {
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+
+  .btn-back {
+    background: linear-gradient(135deg, #6c757d, #5a6169);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(108,117,125,0.3);
+  }
+
+  .btn-back:hover {
+    background: linear-gradient(135deg, #5a6169, #495057);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(108,117,125,0.4);
+    color: white;
+  }
+
+  .btn-add-cart {
+    background: linear-gradient(135deg, #0080FF, #3399FF);
+    color: white;
+    border: none;
+  }
+
+  .btn-add-cart:hover {
+    background: linear-gradient(135deg, #0066CC, #2685E6);
+    transform: translateY(-2px);
+  }
+
+  .product-description {
+    color: #6c757d;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .product-badges {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .badge-custom {
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .badge-available {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+  }
+
+  .badge-unavailable {
+    background: linear-gradient(135deg, #f56565, #e53e3e);
+    color: white;
+  }
+
+  .badge-customizable {
+    background: linear-gradient(135deg, #ed8936, #dd6b20);
+    color: white;
+  }
+
+  .quantity-input {
+    width: 80px;
+    border-radius: 15px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .add-cart-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+</style>
+
+<div class="container">
+  <div class="product-detail-container p-4">
+    <div class="row g-4">
+      <!-- Imagen -->
+      <div class="col-md-6">
+        {% if producto.imagen %}
+          <img src="{{ producto.imagen }}" class="product-image" alt="{{ producto.nombre }}">
+        {% else %}
+          <div class="text-center p-5" style="background: #f8f9fa; border-radius: 15px;">
+            <i class="bi bi-image" style="font-size: 4rem; color: #6c757d;"></i>
+            <p class="mt-3 text-muted">Sin imagen disponible</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Información -->
+      <div class="col-md-6 d-flex flex-column justify-content-start">
+        <h1 class="product-title">{{ producto.nombre }}</h1>
+
+        {% if producto.descripcion %}
+          <div class="product-description">
+            {{ producto.descripcion }}
+          </div>
+        {% endif %}
+
+        <div class="product-price">
+          ${{ "{:,.0f}".format(producto.precio) }}
+        </div>
+
+        <div class="stock-info {% if not producto.disponible %}no-stock{% endif %}">
+          <i class="bi bi-box-seam"></i>
+          {% if producto.disponible %}
+            Producto disponible
+          {% else %}
+            Producto agotado
+          {% endif %}
+        </div>
+
+        <!-- Badges -->
+        <div class="product-badges">
+          {% if producto.disponible %}
+            <span class="badge-custom badge-available">
+              <i class="bi bi-check-circle"></i> Disponible
+            </span>
+          {% else %}
+            <span class="badge-custom badge-unavailable">
+              <i class="bi bi-x-circle"></i> Agotado
+            </span>
+          {% endif %}
+
+          {% if producto.es_personalizable %}
+            <span class="badge-custom badge-customizable">
+              <i class="bi bi-palette"></i> Personalizable
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Agregar al carrito -->
+        {% if producto.disponible %}
+        <form action="{{ url_for('carrito_bp.agregar', id_producto=producto.id_producto) }}" method="POST" class="add-cart-container">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="number" name="cantidad" value="1" min="1" class="quantity-input">
+          <button type="submit" class="btn-add-cart">
+            <i class="bi bi-cart-plus"></i> Agregar al carrito
+          </button>
+        </form>
+        {% endif %}
+
+        <!-- Volver a productos -->
+        <a href="{{ url_for('productos_bp.productos') }}" class="btn-back mt-2">
+          <i class="bi bi-arrow-left"></i> Volver a productos
+        </a>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
