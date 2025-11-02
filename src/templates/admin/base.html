@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Dashboard Administrador{% endblock %} - HandiGenius</title>
+    <title>Dashboard Administrador - HandiGenius</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -49,53 +49,56 @@
                     
                     <ul class="nav nav-pills flex-column mb-auto">
                         <li class="nav-item">
-                            <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                            <a href="{{ url_for('admin_bp.admin') }}" class="nav-link {% if request.endpoint == 'admin_bp.admin' %}active{% endif %}">
                                 <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('admin_usuarios') }}" class="nav-link {% if request.endpoint == 'admin_usuarios' %}active{% endif %}">
+                            <a href="{{ url_for('admin_bp.admin_usuarios') }}" class="nav-link {% if request.endpoint == 'admin_bp.admin_usuarios' %}active{% endif %}">
                                 <i class="fas fa-users me-2"></i>Usuarios
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('admin_productos') }}" class="nav-link {% if request.endpoint == 'admin_productos' %}active{% endif %}">
+                            <a href="{{ url_for('admin_bp.admin_productos') }}" class="nav-link {% if request.endpoint == 'admin_bp.admin_productos' %}active{% endif %}">
                                 <i class="fas fa-box me-2"></i>Productos
                             </a>
                         </li>
+
+                        <!-- 🚧 Arreglo temporal: hasta que exista admin_pedidos -->
                         <li class="nav-item">
-                            <a href="{{ url_for('admin_pedidos') }}" class="nav-link {% if request.endpoint == 'admin_pedidos' %}active{% endif %}">
+                            <a href="{{ url_for('admin_bp.admin_productos') }}" class="nav-link {% if request.endpoint == 'admin_bp.admin_pedidos' %}active{% endif %}">
                                 <i class="fas fa-shopping-cart me-2"></i>Pedidos
                             </a>
                         </li>
+
                         <li class="nav-item">
-                            <a href="{{ url_for('admin_categorias') }}" class="nav-link {% if request.endpoint == 'admin_categorias' %}active{% endif %}">
+                            <a href="{{ url_for('api_bp.api_categorias') }}" class="nav-link {% if request.endpoint == 'admin_bp.admin_categorias' %}active{% endif %}">
                                 <i class="fas fa-tags me-2"></i>Categorías
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('admin_calificaciones') }}" class="nav-link {% if request.endpoint == 'admin_calificaciones' %}active{% endif %}">
+                            <a href="{{ url_for('admin_bp.admin_usuarios') }}" class="nav-link {% if request.endpoint == 'admin_bp.admin_calificaciones' %}active{% endif %}">
                                 <i class="fas fa-star me-2"></i>Calificaciones
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('admin_sugerencias') }}" class="nav-link {% if request.endpoint == 'admin_sugerencias' %}active{% endif %}">
+                            <a href="{{ url_for('admin_bp.admin_usuarios') }}" class="nav-link {% if request.endpoint == 'admin_bp.admin_sugerencias' %}active{% endif %}">
                                 <i class="fas fa-lightbulb me-2"></i>Sugerencias
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('admin_reportes') }}" class="nav-link {% if request.endpoint == 'admin_reportes' %}active{% endif %}">
+                            <a href="{{ url_for('admin_bp.admin_productos') }}" class="nav-link {% if request.endpoint == 'admin_bp.admin_reportes' %}active{% endif %}">
                                 <i class="fas fa-chart-bar me-2"></i>Reportes
                             </a>
                         </li>
                         <hr class="text-white">
                         <li class="nav-item">
-                            <a href="{{ url_for('home') }}" class="nav-link">
+                            <a href="{{ url_for('home_bp.home') }}" class="nav-link">
                                 <i class="fas fa-home me-2"></i>Volver al sitio
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('logout_redirect') }}" class="nav-link">
+                            <a href="{{ url_for('auth_bp.logout_redirect') }}" class="nav-link">
                                 <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión
                             </a>
                         </li>
@@ -118,7 +121,52 @@
                         {% endif %}
                     {% endwith %}
 
-                    {% block content %}{% endblock %}
+                    <!-- Contenido dinámico -->
+                    {% if estadisticas %}
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="stats-card p-3">
+                                <h5>Total Usuarios</h5>
+                                <h3>{{ estadisticas.total_usuarios }}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="stats-card p-3">
+                                <h5>Total Productos</h5>
+                                <h3>{{ estadisticas.total_productos }}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="stats-card p-3">
+                                <h5>Total Pedidos</h5>
+                                <h3>{{ estadisticas.total_pedidos }}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="stats-card p-3">
+                                <h5>Pedidos Pendientes</h5>
+                                <h3>{{ estadisticas.pedidos_pendientes }}</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actividad reciente -->
+                    {% if estadisticas.actividad_reciente %}
+                    <h5 class="mt-4">Actividad reciente</h5>
+                    <ul class="list-group">
+                        {% for item in estadisticas.actividad_reciente %}
+                            <li class="list-group-item">
+                                <strong>{{ item[1] }}</strong> - {{ item[2].strftime('%Y-%m-%d') if item[2] else 'N/A' }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    {% else %}
+                        <!-- Si no hay estadisticas, no rompe -->
+                        <div class="alert alert-secondary">
+                            <i class="fas fa-info-circle me-2"></i> No hay estadísticas disponibles en esta vista.
+                        </div>
+                    {% endif %}
                 </div>
             </main>
         </div>
@@ -126,6 +174,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    {% block scripts %}{% endblock %}
 </body>
 </html>

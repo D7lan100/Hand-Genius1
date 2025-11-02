@@ -1,219 +1,165 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Hand&Genius - Donaciones</title>
-  <!-- Bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <style>
-    body {
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      font-family: 'Segoe UI', Arial, sans-serif;
-    }
+{% extends 'base.html' %}
 
-    /* Navbar */
-    .navbar-custom { 
-      background: linear-gradient(90deg, #0080FF, #3399FF); 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    .navbar-custom .navbar-brand, .navbar-custom .nav-link { 
-      color: white !important; 
-      font-weight: 500;
-    }
+{% block title %}Donaciones{% endblock %}
 
-    /* Card donación */
-    .donacion-card {
-      background: linear-gradient(145deg, #ffffff, #f8f9fa);
-      padding: 30px;
-      border-radius: 20px;
-      max-width: 500px;
-      margin: 40px auto;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      border: 1px solid rgba(0,128,255,0.15);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .donacion-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 40px rgba(0,128,255,0.2);
-    }
+{% block customCSS %}
+<style>
+  body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: 'Segoe UI', Arial, sans-serif;
+  }
 
-    /* Inputs */
-    input, select {
-      border-radius: 12px !important;
-      padding: 12px !important;
-      font-size: 16px !important;
-      border: 1.5px solid #99CCFF !important;
-      transition: all 0.3s ease;
-    }
-    input:focus, select:focus {
-      border-color: #0080FF !important;
-      box-shadow: 0 0 8px rgba(0,128,255,0.3);
-    }
+  /* Card donación */
+  .donacion-card {
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 500px;
+    margin: 40px auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,128,255,0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .donacion-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,128,255,0.2);
+  }
 
-    /* Botón */
-    .btn-donar {
-      background: linear-gradient(135deg, #0080FF, #3399FF);
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      border-radius: 30px;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      box-shadow: 0 5px 15px rgba(0,128,255,0.3);
-    }
-    .btn-donar:hover {
-      background: linear-gradient(135deg, #0066CC, #2685E6);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0,128,255,0.4);
-    }
+  /* Inputs */
+  input, select {
+    border-radius: 12px !important;
+    padding: 12px !important;
+    font-size: 16px !important;
+    border: 1.5px solid #99CCFF !important;
+    transition: all 0.3s ease;
+  }
+  input:focus, select:focus {
+    border-color: #0080FF !important;
+    box-shadow: 0 0 8px rgba(0,128,255,0.3);
+  }
 
-    /* Info pago */
-    .info-pago {
-      margin-top: 15px;
-      background: #fff;
-      border: 1px solid #99CCFF;
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(0,128,255,0.1);
-    }
+  /* Botón */
+  .btn-donar {
+    background: linear-gradient(135deg, #0080FF, #3399FF);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,128,255,0.3);
+  }
+  .btn-donar:hover {
+    background: linear-gradient(135deg, #0066CC, #2685E6);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,128,255,0.4);
+  }
 
-    /* Mensaje error */
-    .mensaje-error {
-      display: none;
-      margin: 20px auto;
-      padding: 15px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #FFBABA, #FF6B6B);
-      color: white;
-      font-weight: 600;
-      max-width: 400px;
-      text-align: center;
-      box-shadow: 0 8px 20px rgba(255,0,0,0.2);
-    }
-  </style>
-</head>
-<body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-custom px-3">
-    <img src="{{ url_for('static', filename='img/logo2.png') }}" alt="Hand&Genius Logo" height="40" class="me-3">
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-3">
-      <li class="nav-item"><a class="nav-link" href="{{ url_for('home_bp.home') }}">Inicio</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Suscripción</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Sugerencias</a></li>
-      <li class="nav-item"><a class="nav-link" href="{{ url_for('navbar_bp.donaciones')}}">Donaciones</a></li>
-      <li class="nav-item"><a class="nav-link" href="{{ url_for('navbar_bp.contacto')}}">Contacto</a></li>
-      <li class="nav-item"><a class="nav-link" href="{{ url_for('navbar_bp.calendario') }}">Calendario</a></li>
-    </ul>
+  /* Info pago */
+  .info-pago {
+    margin-top: 15px;
+    background: #fff;
+    border: 1px solid #99CCFF;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,128,255,0.1);
+  }
 
-    <!-- Iconos derecha -->
-    <div class="d-flex align-items-center">
-      <i class="bi bi-cart mx-3 fs-5"></i>
-      <!-- Dropdown usuario -->
-      <div class="dropdown">
-        <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="bi bi-person-circle fs-4 me-2"></i>
-          <span class="fw-medium">{{ current_user.nombre_completo }}</span>
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom" aria-labelledby="userDropdown">
-          <li>
-            <a class="dropdown-item" href={{ url_for('usuarios_bp.configuracion') }}>
-              <i class="bi bi-gear"></i>
-              Configuración de Perfil
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
-              <i class="bi bi-box-arrow-right"></i>
-              Cerrar Sesión
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  /* Mensaje error */
+  .mensaje-error {
+    display: none;
+    margin: 20px auto;
+    padding: 15px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #FFBABA, #FF6B6B);
+    color: white;
+    font-weight: 600;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(255,0,0,0.2);
+  }
+</style>
+{% endblock %}
 
-  <!-- Contenido -->
-  <main class="container text-center my-5">
-    <h3 class="fw-bold">Bienvenido a nuestro sistema de donaciones voluntarias</h3>
-    <p class="text-muted">Tu apoyo nos ayuda a seguir creciendo 💙.</p>
+{% block content %}
+<main class="container text-center my-5">
+  <h3 class="fw-bold">Bienvenido a nuestro sistema de donaciones voluntarias</h3>
+  <p class="text-muted">Tu apoyo nos ayuda a seguir creciendo 💙.</p>
 
-    <!-- Formulario visible directamente -->
-    <div id="formularioDonacion" class="donacion-card">
-      <h4 class="mb-3 text-primary fw-bold">Apóyanos</h4>
+  <!-- Formulario -->
+  <div id="formularioDonacion" class="donacion-card">
+    <h4 class="mb-3 text-primary fw-bold">Apóyanos</h4>
 
-      <label for="monto" class="form-label fw-semibold">Monto a aportar (COP):</label>
-      <input type="number" id="monto" class="form-control" min="1000" step="1000" placeholder="Ej: 50000">
+    <label for="monto" class="form-label fw-semibold">Monto a aportar (COP):</label>
+    <input type="number" id="monto" class="form-control" min="1000" step="1000" placeholder="Ej: 50000">
 
-      <label for="metodo" class="form-label fw-semibold mt-3">Método de pago:</label>
-      <select id="metodo" class="form-select" onchange="mostrarInfoPago()">
-        <option value=""> Selecciona</option>
-        <option value="nequi">Nequi</option>
-        <option value="daviplata">Daviplata</option>
-        <option value="tarjeta">Tarjeta de Crédito</option>
-        <option value="paypal">PayPal</option>
-      </select>
+    <label for="metodo" class="form-label fw-semibold mt-3">Método de pago:</label>
+    <select id="metodo" class="form-select" onchange="mostrarInfoPago()">
+      <option value=""> Selecciona</option>
+      <option value="nequi">Nequi</option>
+      <option value="daviplata">Daviplata</option>
+      <option value="tarjeta">Tarjeta de Crédito</option>
+      <option value="paypal">PayPal</option>
+    </select>
 
-      <!-- Info dinámica -->
-      <div id="infoPago" class="info-pago" style="display:none;"></div>
+    <div id="infoPago" class="info-pago" style="display:none;"></div>
 
-      <button class="btn-donar mt-3 w-100" onclick="procesarDonacion()">Confirmar donación</button>
-    </div>
-  </main>
-
-  <!-- Mensaje de error -->
-  <div id="mensajeError" class="mensaje-error">
-    ❌ Ocurrió un error al procesar la donación. Inténtalo de nuevo.
+    <button class="btn-donar mt-3 w-100" onclick="procesarDonacion()">Confirmar donación</button>
   </div>
+</main>
 
-  <script>
-    function mostrarInfoPago() {
-      const metodo = document.getElementById("metodo").value;
-      const infoDiv = document.getElementById("infoPago");
-      infoDiv.style.display = "block";
+<div id="mensajeError" class="mensaje-error">
+  ❌ Ocurrió un error al procesar la donación. Inténtalo de nuevo.
+</div>
+{% endblock %}
 
-      if (metodo === "nequi") {
-        infoDiv.innerHTML = "<p>Transfiere tu donación al número Nequi: <b>300 123 4567</b></p>";
-      } else if (metodo === "daviplata") {
-        infoDiv.innerHTML = "<p>Transfiere tu donación al número Daviplata: <b>301 765 4321</b></p>";
-      } else if (metodo === "tarjeta") {
-        infoDiv.innerHTML = `
-          <p>Ingresa los datos de tu tarjeta:</p>
-          <input type="text" class="form-control mb-2" placeholder="Número de tarjeta (16 dígitos)" maxlength="16">
-          <input type="text" class="form-control mb-2" placeholder="MM/AA" maxlength="5">
-          <input type="text" class="form-control" placeholder="CVV" maxlength="3">
-        `;
-      } else if (metodo === "paypal") {
-        infoDiv.innerHTML = "<p>Serás redirigido a PayPal para completar tu donación.</p>";
-      } else {
-        infoDiv.style.display = "none";
-      }
+{% block customJS %}
+<script>
+function mostrarInfoPago() {
+  const metodo = document.getElementById("metodo").value;
+  const infoDiv = document.getElementById("infoPago");
+  infoDiv.style.display = "block";
+
+  if (metodo === "nequi") {
+    infoDiv.innerHTML = "<p>Transfiere tu donación al número Nequi: <b>300 123 4567</b></p>";
+  } else if (metodo === "daviplata") {
+    infoDiv.innerHTML = "<p>Transfiere tu donación al número Daviplata: <b>301 765 4321</b></p>";
+  } else if (metodo === "tarjeta") {
+    infoDiv.innerHTML = `
+      <p>Ingresa los datos de tu tarjeta:</p>
+      <input type="text" class="form-control mb-2" placeholder="Número de tarjeta (16 dígitos)" maxlength="16">
+      <input type="text" class="form-control mb-2" placeholder="MM/AA" maxlength="5">
+      <input type="text" class="form-control" placeholder="CVV" maxlength="3">
+    `;
+  } else if (metodo === "paypal") {
+    infoDiv.innerHTML = "<p>Serás redirigido a PayPal para completar tu donación.</p>";
+  } else {
+    infoDiv.style.display = "none";
+  }
+}
+
+function procesarDonacion() {
+  const monto = document.getElementById("monto").value;
+  const metodo = document.getElementById("metodo").value;
+
+  if (!monto || monto < 1000) {
+    alert("Por favor ingresa un monto válido (mínimo $1.000).");
+    return;
+  }
+  if (!metodo) {
+    alert("Selecciona un método de pago.");
+    return;
+  }
+
+  try {
+    if (metodo === "paypal") {
+      window.location.href = "https://www.paypal.com/donate";
+    } else {
+      alert("✅ Donación registrada por " + metodo + " de $" + monto);
     }
-
-    function procesarDonacion() {
-      const monto = document.getElementById("monto").value;
-      const metodo = document.getElementById("metodo").value;
-
-      if (!monto || monto < 1000) {
-        alert("Por favor ingresa un monto válido (mínimo $1.000).");
-        return;
-      }
-      if (!metodo) {
-        alert("Selecciona un método de pago.");
-        return;
-      }
-
-      try {
-        if (metodo === "paypal") {
-          window.location.href = "https://www.paypal.com/donate";
-        } else {
-          alert("✅ Donación registrada por " + metodo + " de $" + monto);
-        }
-      } catch (error) {
-        document.getElementById("mensajeError").style.display = "block";
-      }
-    }
-  </script>
-</body>
-</html>
+  } catch (error) {
+    document.getElementById("mensajeError").style.display = "block";
+  }
+}
+</script>
+{% endblock %}

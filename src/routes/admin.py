@@ -13,13 +13,17 @@ admin_bp = Blueprint('admin_bp', __name__)
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # Si no está autenticado, Flask-Login ya se encargará gracias a @login_required,
+        # pero igual podemos reforzarlo:
         if not current_user.is_authenticated:
-            return redirect(url_for('login'))
+            return redirect(url_for('auth_bp.login', next=request.url))
+        # Si no tiene rol de administrador
         if getattr(current_user, 'id_rol', None) != 2:
-            flash("No tienes permisos para acceder a esta área", "error")
-            return redirect(url_for('home'))
+            flash("No tienes permisos para acceder al panel de administración.", "error")
+            return redirect(url_for('home_bp.home'))  # 👈 o cualquier vista pública segura
         return f(*args, **kwargs)
     return decorated_function
+
 
 @admin_bp.route('/admin', endpoint='admin')
 @login_required

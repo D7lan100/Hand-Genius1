@@ -51,6 +51,10 @@ def create_app():
     from src.routes.navbar import navbar_bp
     from src.routes.usuarios import usuarios_bp
     from src.routes.carrito import carrito_bp
+    from src.routes.suscripciones import suscripciones_bp
+    from src.routes.admin_suscripciones import admin_suscripciones_bp
+
+
 
     # Registrar blueprints
     app.register_blueprint(auth_bp)
@@ -61,9 +65,12 @@ def create_app():
     app.register_blueprint(navbar_bp)
     app.register_blueprint(usuarios_bp)
     app.register_blueprint(carrito_bp)
+    app.register_blueprint(suscripciones_bp, url_prefix="/suscripciones")
+    app.register_blueprint(admin_suscripciones_bp, url_prefix="/admin/suscripciones")
 
     # Exenciones CSRF
     csrf_exempt_endpoints = [
+    'auth_bp.logout_redirect',
     'admin_editar_usuario',
     'admin_eliminar_usuario',
     'admin_editar_producto',

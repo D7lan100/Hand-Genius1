@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Gestión de Suscripciones</h2>
+  <table class="table table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Usuario</th>
+        <th>Plan</th>
+        <th>Fecha inicio</th>
+        <th>Fecha fin</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in suscripciones %}
+      <tr>
+        <td>{{ s[0] }}</td>
+        <td>{{ s[1] }}</td>
+        <td>{{ s[2] }}</td>
+        <td>{{ s[3] }}</td>
+        <td>{{ s[4] }}</td>
+        <td>
+          <a href="{{ url_for('admin_suscripciones_bp.aprobar', id_suscripcion=s[0]) }}" class="btn btn-success btn-sm">Aprobar</a>
+          <a href="{{ url_for('admin_suscripciones_bp.rechazar', id_suscripcion=s[0]) }}" class="btn btn-danger btn-sm">Rechazar</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

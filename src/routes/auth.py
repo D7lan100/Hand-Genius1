@@ -59,6 +59,7 @@ def login():
 
 @auth_bp.route('/logout_redirect', methods=['POST'])
 @login_required
+
 def logout_redirect():
     logout_user()
     flash("Has cerrado sesión exitosamente", "success")

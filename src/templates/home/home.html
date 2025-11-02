@@ -83,7 +83,7 @@
     <img src="{{ url_for('static', filename='img/logo2.png') }}" alt="Hand&Genius Logo" height="40" class="me-3">
     <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-3">
       <li class="nav-item"><a class="nav-link" href="{{ url_for('home_bp.home') }}">Inicio</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Suscripción</a></li>
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('suscripciones_bp.ver_suscripcion') }}">Suscripción</a></li>
       <li class="nav-item"><a class="nav-link" href="#">Sugerencias</a></li>
       <li class="nav-item"><a class="nav-link" href="{{ url_for('navbar_bp.donaciones')}}">Donaciones</a></li>
       <li class="nav-item"><a class="nav-link" href="{{ url_for('navbar_bp.contacto')}}">Contacto</a></li>
@@ -91,7 +91,7 @@
     </ul>
 
     <div class="d-flex align-items-center">
-      <a href="{{ url_for('carrito_bp.ver') }}" class="text-decoration-none text-dark">
+      <a href="{{ url_for('carrito_bp.ver') }}" class="text-decoration-none text-white">
         <i class="bi bi-cart mx-3 fs-5"></i>
       </a>
       <div class="dropdown">
