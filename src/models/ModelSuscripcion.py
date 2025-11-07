@@ -1,4 +1,6 @@
 from datetime import datetime
+import MySQLdb.cursors
+from src.models.entities.Suscripcion import Suscripcion  # ✅ importa tu entidad
 
 class ModelSuscripcion:
 
@@ -6,7 +8,7 @@ class ModelSuscripcion:
     @classmethod
     def listar_suscripciones(cls, db):
         try:
-            cursor = db.connection.cursor(dictionary=True)
+            cursor = db.connection.cursor(MySQLdb.cursors.DictCursor)
             sql = """
                 SELECT 
                     s.id_suscripcion,
@@ -60,7 +62,7 @@ class ModelSuscripcion:
     @classmethod
     def ingresos_mes(cls, db):
         try:
-            cursor = db.connection.cursor(dictionary=True)
+            cursor = db.connection.cursor(MySQLdb.cursors.DictCursor)
             sql = """
                 SELECT IFNULL(SUM(ts.precio), 0) AS ingresos
                 FROM suscripciones s
@@ -80,7 +82,7 @@ class ModelSuscripcion:
     @classmethod
     def recientes(cls, db):
         try:
-            cursor = db.connection.cursor(dictionary=True)
+            cursor = db.connection.cursor(MySQLdb.cursors.DictCursor)
             sql = """
                 SELECT 
                     u.nombre_completo AS usuario,
@@ -99,3 +101,68 @@ class ModelSuscripcion:
             return result
         except Exception as ex:
             raise Exception(f"Error al obtener suscripciones recientes: {ex}")
+        
+    # 🔒 Validar suscripciones vencidas
+    @classmethod
+    def validar_vencidas(cls, db):
+        try:
+            cursor = db.connection.cursor()
+            sql = """
+                UPDATE suscripciones
+                SET estado = 'Vencida'
+                WHERE fecha_fin < CURDATE() AND estado != 'Vencida'
+            """
+            cursor.execute(sql)
+            db.connection.commit()
+            cursor.close()
+            return True
+        except Exception as ex:
+            db.connection.rollback()
+            raise Exception(f"Error al validar suscripciones vencidas: {ex}")
+        
+    # 🧾 Obtener la última suscripción del usuario
+    @classmethod
+    def get_last_by_user(cls, db, id_usuario):
+        try:
+            cursor = db.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("""
+                SELECT * FROM suscripciones
+                WHERE id_usuario = %s
+                ORDER BY fecha_inicio DESC
+                LIMIT 1
+            """, (id_usuario,))
+            result = cursor.fetchone()
+            cursor.close()
+
+            # ✅ Convertimos el resultado en una instancia de la clase Suscripcion
+            if result:
+                return Suscripcion(**result)
+            return None
+
+        except Exception as ex:
+            raise Exception(f"Error al obtener la última suscripción del usuario: {ex}")
+        
+    @classmethod
+    def insert(cls, db, suscripcion):
+        try:
+            cursor = db.connection.cursor()
+            sql = """
+                INSERT INTO suscripciones (id_usuario, id_tipo_suscripcion, fecha_inicio, fecha_fin, comprobante, estado)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            values = (
+                suscripcion.id_usuario,
+                suscripcion.id_tipo_suscripcion,
+                suscripcion.fecha_inicio,
+                suscripcion.fecha_fin,
+                suscripcion.comprobante,
+                suscripcion.estado
+            )
+            cursor.execute(sql, values)
+            db.connection.commit()
+            cursor.close()
+            return True
+        except Exception as ex:
+            db.connection.rollback()
+            raise Exception(f"Error al insertar suscripción: {ex}")
+

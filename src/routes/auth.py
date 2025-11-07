@@ -51,8 +51,14 @@ def login():
         if logged_user and check_password_hash(logged_user.contraseña, password):
             login_user(logged_user)
             flash("Inicio de sesión exitoso. ¡Bienvenido!", "success")
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('home_bp.home'))
+
+            # 🔹 Aquí añadimos la redirección según el rol del usuario
+            if logged_user.id_rol == 2:  # Administrador
+                return redirect(url_for('admin_bp.usuarios'))
+            else:
+                next_page = request.args.get('next')
+                return redirect(next_page) if next_page else redirect(url_for('home_bp.home'))
+
         else:
             flash("Usuario o contraseña incorrectos", "error")
 
