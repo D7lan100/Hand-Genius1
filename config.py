@@ -1,5 +1,5 @@
 class Config:
-    SECRET_KEY = 'your_secret_key'
+    SECRET_KEY = 'handiGenius2024'
 
     # Configuración de correo con Gmail
     MAIL_SERVER = "smtp.gmail.com"

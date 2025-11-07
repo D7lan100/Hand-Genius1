@@ -2,6 +2,9 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from functools import wraps
 from datetime import date, timedelta
+from src.models.ModelUser import ModelUser
+from src.models.entities.User import User
+from src.database.db import get_connection
 import os
 
 admin_bp = Blueprint('admin_bp', __name__, url_prefix='/admin', template_folder='../../templates/admin')
@@ -176,20 +179,114 @@ def index():
 # ---------------------------
 @admin_bp.route('/usuarios')
 @login_required
-@admin_required
+@admin_required   # <-- agrega esto
 def usuarios():
-    db = current_app.db
-    try:
-        cursor = db.connection.cursor()
-        cursor.execute("SELECT id_usuario, correo_electronico, nombre_completo, id_rol FROM usuarios ORDER BY nombre_completo")
-        usuarios = fetchall_dict(cursor)
-        cursor.close()
-    except Exception as e:
-        usuarios = []
-        current_app.logger.exception("Error obteniendo usuarios: %s", e)
-        flash("Error al cargar usuarios.", "danger")
-    return render_template('admin/usuarios.html', usuarios=usuarios, user=current_user)
+    db = get_connection()
+    usuarios = ModelUser.listar_todos(db)
+    return render_template('admin/usuarios.html', usuarios=usuarios)
 
+@admin_bp.route('/usuario/<int:id>/eliminar', methods=['POST'])
+@login_required
+def eliminar_usuario(id):
+    from src.database.db import get_connection
+
+    connection = get_connection()
+    if not connection:
+        flash("❌ Error al conectar con la base de datos", "danger")
+        return redirect(url_for('admin_bp.usuarios'))
+
+    try:
+        with connection.cursor() as cursor:
+            # Obtener productos del usuario
+            cursor.execute("SELECT id_producto FROM productos WHERE id_vendedor = %s", (id,))
+            productos = cursor.fetchall()  # Lista de diccionarios [{'id_producto': 1}, ...]
+
+            if productos:
+                # ✅ Usar clave del diccionario
+                producto_ids = tuple(prod['id_producto'] for prod in productos)
+                if len(producto_ids) == 1:
+                    producto_ids = (producto_ids[0],)
+
+                # Eliminar dependencias
+                cursor.execute(f"DELETE FROM calificaciones WHERE id_producto IN {producto_ids}")
+                cursor.execute(f"DELETE FROM detalle_pedido WHERE id_producto IN {producto_ids}")
+                cursor.execute(f"DELETE FROM material_audiovisual WHERE id_producto IN {producto_ids}")
+                cursor.execute(f"DELETE FROM producto_relacion WHERE id_producto_padre IN {producto_ids} OR id_producto_hijo IN {producto_ids}")
+                cursor.execute(f"DELETE FROM productos WHERE id_producto IN {producto_ids}")
+
+            # Eliminar suscripciones y usuario
+            cursor.execute("DELETE FROM suscripciones WHERE id_usuario = %s", (id,))
+            cursor.execute("DELETE FROM usuarios WHERE id_usuario = %s", (id,))
+
+            connection.commit()
+            flash("✅ Usuario y todos sus datos relacionados eliminados correctamente", "success")
+
+    except Exception as e:
+        connection.rollback()
+        flash("❌ Error inesperado al eliminar usuario. Revisa la consola para detalles.", "danger")
+        import traceback
+        print(traceback.format_exc())
+
+    finally:
+        connection.close()
+
+    return redirect(url_for('admin_bp.usuarios'))
+
+@admin_bp.route('/usuario/<int:id>/editar', methods=['POST'])
+@login_required
+def editar_usuario(id):
+    from src.database.db import get_connection
+
+    connection = get_connection()
+    if not connection:
+        flash("❌ Error al conectar con la base de datos", "danger")
+        return redirect(url_for('admin_bp.usuarios'))
+
+    try:
+        # Obtener datos del formulario
+        nombre = request.form.get('nombre')          # Input "nombre" del modal
+        correo = request.form.get('correo')          # Input "correo" del modal
+        telefono = request.form.get('telefono')      # Input "telefono" del modal
+        direccion = request.form.get('direccion')    # Input "direccion" del modal
+
+        # Validación mínima
+        if not nombre or not correo:
+            flash("❌ Nombre y correo son obligatorios", "warning")
+            return redirect(url_for('admin_bp.usuarios'))
+
+        with connection.cursor() as cursor:
+            # Verificar que el correo no exista en otro usuario
+            cursor.execute(
+                "SELECT id_usuario FROM usuarios WHERE correo_electronico = %s AND id_usuario != %s",
+                (correo, id)
+            )
+            if cursor.fetchone():
+                flash("❌ Este correo ya está registrado en otro usuario", "warning")
+                return redirect(url_for('admin_bp.usuarios'))
+
+            # Actualizar usuario usando los nombres correctos de columnas
+            cursor.execute("""
+                UPDATE usuarios
+                SET nombre_completo = %s,
+                    correo_electronico = %s,
+                    telefono = %s,
+                    direccion = %s
+                WHERE id_usuario = %s
+            """, (nombre, correo, telefono, direccion, id))
+
+            connection.commit()
+            flash("✅ Usuario actualizado correctamente", "success")
+
+    except Exception as e:
+        connection.rollback()
+        import traceback
+        print(traceback.format_exc())  # Para depuración en la consola
+        flash(f"❌ Error inesperado al editar usuario: {e}", "danger")
+
+    finally:
+        connection.close()
+
+    return redirect(url_for('admin_bp.usuarios'))
 
 # ---------------------------
 # Productos list (admin)

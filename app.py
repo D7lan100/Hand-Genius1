@@ -62,14 +62,13 @@ def create_app():
 
     # ------------------ EXENCIONES CSRF ------------------
     csrf_exempt_endpoints = [
-        'auth_bp.logout_redirect',
-        'admin_editar_usuario',
-        'admin_eliminar_usuario',
-        'admin_editar_producto',
-        'admin_eliminar_producto',
-        'admin_agregar_producto',
-        'actualizar_perfil',
-        'api_eventos',
+        'admin_bp.in_editar_usuario',
+        'admin_bp.admin_eliminar_usuario',
+        'admin_bp.admin_editar_producto',
+        'admin_bp.admin_eliminar_producto',
+        'admin_bp.admin_agregar_producto',
+        'usuario_bp.actualizar_perfil',
+        'api_bp.api_eventos',
         'carrito_bp.agregar',
         'carrito_bp.vaciar',
         'carrito_bp.eliminar',
@@ -77,7 +76,9 @@ def create_app():
         'navbar_bp.calendario',
         'suscripciones_bp.subir_comprobante',
         'admin_bp.aprobar_suscripcion',
-        'admin_bp.rechazar_suscripcion'
+        'admin_bp.rechazar_suscripcion',
+        'admin_bp.eliminar_usuario',
+        'admin_bp.editar_usuario'
     ]
 
     for ep in csrf_exempt_endpoints:

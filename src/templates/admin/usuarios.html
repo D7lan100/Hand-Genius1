@@ -25,24 +25,30 @@
                 <tbody>
                     {% for u in usuarios %}
                     <tr>
-                        <td>{{ u[0] }}</td>
-                        <td>{{ u[1] }}</td>
-                        <td>{{ u[2] }}</td>
-                        <td>{{ u[3] or 'N/A' }}</td>
-                        <td>{{ u[5] or 'Usuario' }}</td>
-                        <td>{{ u[4].strftime('%d/%m/%Y') if u[4] else '' }}</td>
+                        <td>{{ u.id or u[0] or u['id'] }}</td>
+                        <td>{{ u.nombre or u[1] or u['nombre'] }}</td>
+                        <td>{{ u.email or u.correo or u['correo_electronico'] or 'Sin correo' }}</td>
+                        <td>{{ u.telefono or u[3] or u['telefono'] or 'N/A' }}</td>
+                        <td>{{ u.rol or u[5] or u['rol'] or 'Usuario' }}</td>
+                        <td>
+                            {% if u.fecha_registro %}
+                                {{ u.fecha_registro.strftime('%d/%m/%Y') if u.fecha_registro.__class__.__name__ == 'date' else u.fecha_registro }}
+                            {% elif u[4] %}
+                                {{ u[4].strftime('%d/%m/%Y') if u[4].__class__.__name__ == 'date' else u[4] }}
+                            {% endif %}
+                        </td>
                         <td>
                             <button class="btn btn-sm btn-primary edit-btn"
-                                    data-id="{{ u[0] }}"
-                                    data-nombre="{{ u[1] }}"
-                                    data-email="{{ u[2] }}"
-                                    data-telefono="{{ u[3] }}"
-                                    data-rol="{{ u[5] }}">
+                                    data-id="{{ u.id or u[0] }}"
+                                    data-nombre="{{ u.nombre or u[1] }}"
+                                    data-correo="{{ u.email or u.correo or u['correo_electronico'] }}"
+                                    data-celular="{{ u.telefono or u[3] }}"
+                                    data-direccion="{{ u.direccion or u[6] }}">
                                 Editar
                             </button>
                             <button class="btn btn-sm btn-danger delete-btn"
-                                    data-id="{{ u[0] }}"
-                                    data-nombre="{{ u[1] }}">
+                                    data-id="{{ u.id or u[0] }}"
+                                    data-nombre="{{ u.nombre or u[1] }}">
                                 Eliminar
                             </button>
                         </td>
@@ -65,6 +71,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="formEdit" method="POST">
+        {{ csrf_token() }}
         <div class="modal-header">
           <h5 class="modal-title">Editar Usuario</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -73,22 +80,19 @@
           <input type="hidden" name="id_usuario" id="modal-id">
           <div class="mb-3">
             <label>Nombre Completo</label>
-            <input type="text" name="nombre_completo" id="modal-nombre" class="form-control" required>
+            <input type="text" name="nombre" id="modal-nombre" class="form-control" required>
           </div>
           <div class="mb-3">
             <label>Email</label>
-            <input type="email" name="correo_electronico" id="modal-email" class="form-control" required>
+            <input type="email" name="correo" id="modal-correo" class="form-control" required>
           </div>
           <div class="mb-3">
             <label>Teléfono</label>
-            <input type="text" name="telefono" id="modal-telefono" class="form-control">
+            <input type="text" name="celular" id="modal-celular" class="form-control">
           </div>
           <div class="mb-3">
-            <label>Rol</label>
-            <select name="id_rol" id="modal-rol" class="form-select">
-                <option value="1">Administrador</option>
-                <option value="2">Usuario</option>
-            </select>
+            <label>Dirección</label>
+            <input type="text" name="direccion" id="modal-direccion" class="form-control">
           </div>
         </div>
         <div class="modal-footer">
@@ -105,6 +109,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="formDelete" method="POST">
+        {{ csrf_token() }}
         <div class="modal-header bg-danger text-white">
           <h5 class="modal-title">Confirmar Eliminación</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -127,12 +132,10 @@ document.querySelectorAll('.edit-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.getElementById('modal-id').value = btn.dataset.id;
     document.getElementById('modal-nombre').value = btn.dataset.nombre;
-    document.getElementById('modal-email').value = btn.dataset.email;
-    document.getElementById('modal-telefono').value = btn.dataset.telefono;
-    document.getElementById('modal-rol').value = btn.dataset.rol == 'Administrador' ? 1 : 2;
-
+    document.getElementById('modal-correo').value = btn.dataset.correo;
+    document.getElementById('modal-celular').value = btn.dataset.celular;
+    document.getElementById('modal-direccion').value = btn.dataset.direccion || '';
     document.getElementById('formEdit').action = `/admin/usuario/${btn.dataset.id}/editar`;
-
     new bootstrap.Modal(document.getElementById('modalEdit')).show();
   });
 });

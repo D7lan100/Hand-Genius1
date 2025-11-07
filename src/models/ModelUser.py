@@ -160,3 +160,38 @@ class ModelUser:
         except Exception as ex:
             db.connection.rollback()
             return False
+        
+    @classmethod
+    def listar_todos(cls, db):
+        try:
+            cursor = db.cursor()
+            query = """
+            SELECT 
+                u.id_usuario,
+                u.nombre_completo,
+                u.correo_electronico,
+                u.telefono,
+                r.nombre AS rol,
+                u.fecha_registro
+            FROM usuarios u
+            LEFT JOIN roles r ON u.id_rol = r.id_rol
+            ORDER BY u.id_usuario ASC
+            """
+            cursor.execute(query)
+            rows = cursor.fetchall()
+
+            usuarios = []
+            for row in rows:
+                usuarios.append({
+                    'id': row['id_usuario'],
+                    'nombre': row['nombre_completo'],
+                    'correo': row['correo_electronico'],
+                    'telefono': row['telefono'],
+                    'rol': row['rol'] if row['rol'] else 'Sin rol',
+                    'fecha_registro': row['fecha_registro']
+                })
+            return usuarios
+
+        except Exception as ex:
+            print("❌ Error al listar usuarios:", ex)
+            raise Exception(ex)

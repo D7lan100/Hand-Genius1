@@ -19,7 +19,7 @@
       <nav class="col-md-2 sidebar">
         <div class="text-center mb-3">
           <h5 class="text-white">Panel Admin</h5>
-          <small class="text-muted">{{ user.nombre_completo }}</small>
+          <small class="text-muted">{{ current_user.nombre_completo or current_user.nombre or current_user.username }}</small>
         </div>
         <a href="{{ url_for('admin_bp.index') }}" class="{% if request.endpoint == 'admin_bp.index' %}active{% endif %}">Dashboard</a>
         <a href="{{ url_for('admin_bp.usuarios') }}" class="{% if request.endpoint == 'admin_bp.usuarios' %}active{% endif %}">Usuarios</a>
