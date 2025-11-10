@@ -226,6 +226,14 @@
         </form>
         {% endif %}
 
+        {% if producto.es_personalizable %}
+          <a href="{{ url_for('productos_bp.panel_personalizacion', id_producto=producto.id_producto) }}"
+            class="btn-add-cart">
+            <i class="bi bi-palette"></i> Personalizar
+          </a>
+        {% endif %}
+
+
         <!-- Volver a productos -->
         <a href="{{ url_for('productos_bp.productos') }}" class="btn-back mt-2">
           <i class="bi bi-arrow-left"></i> Volver a productos
