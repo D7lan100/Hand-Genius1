@@ -1,4 +1,4 @@
-    # src/routes/personalizacion.py
+# src/routes/personalizacion.py
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 import os
 

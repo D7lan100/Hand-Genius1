@@ -1,12 +1,9 @@
 # src/routes/productos.py
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
 from flask_login import login_required, current_user
+from src.models.ModelProducto import ModelProducto
 from werkzeug.utils import secure_filename
 import os
-from src.models.ModelProducto import ModelProducto
-from src.models.entities.Productos import Producto
-
-productos_bp = Blueprint('productos_bp', __name__)
 
 def get_cursor():
     """Devuelve un cursor nuevo asegurando que use la BD correcta"""
@@ -15,14 +12,19 @@ def get_cursor():
     cursor.execute(f"USE {current_app.config['MYSQL_DB']};")
     return cursor
 
-# ------------------------------
-# Rutas para mostrar productos
-# ------------------------------
+productos_bp = Blueprint('productos_bp', __name__)
 
 @productos_bp.route('/productos', endpoint='productos')
 def productos():
     try:
         productos_lista = ModelProducto.get_all(current_app.db)
+        print(f"Se cargaron {len(productos_lista)} productos")  # Debug
+
+        if productos_lista:
+            primer_producto = productos_lista[0]
+            print(f"Primer producto - ID: {primer_producto.id}, Nombre: {primer_producto.nombre}")
+            print(f"Atributos disponibles: {list(vars(primer_producto).keys())}")
+
         return render_template('producto/productos.html', productos=productos_lista)
     except Exception as e:
         print(f"Error en ruta /productos: {e}")
@@ -32,16 +34,20 @@ def productos():
 @productos_bp.route('/producto/<int:id>', endpoint='detalle_producto')
 def detalle_producto(id):
     try:
+        print(f"Buscando producto con ID: {id}")
         producto = ModelProducto.get_by_id(current_app.db, id)
+
         if not producto:
             flash("Producto no encontrado", "error")
-            return redirect(url_for('productos_bp.productos'))
+            return redirect(url_for('productos'))
 
+        print(f"Producto encontrado: {producto.nombre}")
         return render_template('producto/detalle_producto.html', producto=producto)
+
     except Exception as e:
         print(f"Error en detalle_producto: {e}")
         flash(f"Error al cargar el producto: {str(e)}", "error")
-        return redirect(url_for('productos_bp.productos'))
+        return redirect(url_for('productos'))
 
 @productos_bp.route('/productos/categoria/<int:id_categoria>', endpoint='productos_por_categoria')
 def productos_por_categoria(id_categoria):
@@ -59,7 +65,7 @@ def buscar_productos():
         termino = request.args.get('q', '').strip()
         if not termino:
             flash("Ingresa un término de búsqueda", "info")
-            return redirect(url_for('productos_bp.productos'))
+            return redirect(url_for('productos'))
 
         productos_lista = ModelProducto.search(current_app.db, termino)
         return render_template('producto/productos.html', productos=productos_lista, termino_busqueda=termino)
@@ -73,11 +79,7 @@ def buscar_productos():
 def protected():
     return render_template('usuarios/base.html', user=current_user)
 
-# -------------------------------------------
-# Panel de personalización
-# -------------------------------------------
-
-@productos_bp.route('/personalizacion_panel/<int:id_producto>', endpoint='panel_personalizacion')
+@productos_bp.route('/personalizacion_panel/<int:id_producto>')
 def panel_personalizacion(id_producto):
     """
     Muestra las 4 opciones de personalización:
@@ -86,17 +88,7 @@ def panel_personalizacion(id_producto):
     3. Subir boceto
     4. Formulario externo de Google
     """
-    try:
-        producto = ModelProducto.get_by_id(current_app.db, id_producto)
-        if not producto:
-            flash("Producto no encontrado", "error")
-            return redirect(url_for('productos_bp.productos'))
-
-        return render_template('producto/panel_personalizacion.html', producto=producto)
-    except Exception as e:
-        print(f"Error en panel_personalizacion: {e}")
-        flash("Error al cargar el panel de personalización", "danger")
-        return redirect(url_for('productos_bp.productos'))
+    return render_template('producto/panel_personalizacion.html', id_producto=id_producto)
 
 @productos_bp.route('/personalizar/<int:id_producto>')
 def personalizar(id_producto):
@@ -112,40 +104,42 @@ def personalizar(id_producto):
         flash("Error al cargar la personalización del producto", "danger")
         return redirect(url_for('productos_bp.productos'))
 
-# -------------------------------------------
-# Funciones para guardar personalización
-# -------------------------------------------
 
-def obtener_pedido_pendiente(cursor, id_usuario):
-    cursor.execute("""
-        SELECT id_pedido FROM pedidos
-        WHERE id_usuario = %s AND estado = 'pendiente' LIMIT 1
-    """, (id_usuario,))
-    pedido = cursor.fetchone()
-    if pedido:
-        return pedido[0]
-    else:
-        cursor.execute("""
-            INSERT INTO pedidos (id_usuario, fecha_pedido, estado, metodo_pago)
-            VALUES (%s, NOW(), 'pendiente', 'No definido')
-        """, (id_usuario,))
-        current_app.db.connection.commit()
-        cursor.execute("SELECT LAST_INSERT_ID()")
-        return cursor.fetchone()[0]
+# ===============================================================
+# === CONEXIÓN DE LAS 4 OPCIONES DE PERSONALIZACIÓN CON LA BD ===
+# ===============================================================
 
 @productos_bp.route('/guardar_texto_personalizado/<int:id_producto>', methods=['POST'])
 def guardar_texto_personalizado(id_producto):
     db = current_app.db
     try:
         texto = request.form.get('texto_personalizado', '').strip()
+        id_usuario = current_user.id_usuario
+
         if not texto:
             return jsonify(success=False, message="Por favor escribe una descripción antes de enviar."), 400
 
-        id_usuario = current_user.id_usuario
         cursor = db.connection.cursor()
-        id_pedido = obtener_pedido_pendiente(cursor, id_usuario)
 
-        # Verificar si ya existe un detalle
+        # Buscar pedido pendiente del usuario
+        cursor.execute("""
+            SELECT id_pedido FROM pedidos
+            WHERE id_usuario = %s AND estado = 'pendiente' LIMIT 1
+        """, (id_usuario,))
+        pedido = cursor.fetchone()
+
+        if not pedido:
+            cursor.execute("""
+                INSERT INTO pedidos (id_usuario, fecha_pedido, estado, metodo_pago)
+                VALUES (%s, NOW(), 'pendiente', 'No definido')
+            """, (id_usuario,))
+            db.connection.commit()
+            cursor.execute("SELECT LAST_INSERT_ID()")
+            id_pedido = cursor.fetchone()[0]
+        else:
+            id_pedido = pedido[0]
+
+        # Buscar si ya existe un detalle del mismo producto
         cursor.execute("""
             SELECT id_detalle FROM detalle_pedido
             WHERE id_pedido = %s AND id_producto = %s
@@ -166,10 +160,12 @@ def guardar_texto_personalizado(id_producto):
 
         db.connection.commit()
         return jsonify(success=True)
+
     except Exception as e:
         db.connection.rollback()
         print(f"❌ ERROR SQL TEXTO: {e}")
         return jsonify(success=False, message=str(e)), 500
+    
 
 @productos_bp.route('/subir_boceto/<int:id_producto>', methods=['POST'])
 def subir_boceto(id_producto):
@@ -187,8 +183,26 @@ def subir_boceto(id_producto):
 
         id_usuario = current_user.id_usuario
         cursor = db.connection.cursor()
-        id_pedido = obtener_pedido_pendiente(cursor, id_usuario)
 
+        # Buscar pedido pendiente
+        cursor.execute("""
+            SELECT id_pedido FROM pedidos
+            WHERE id_usuario = %s AND estado = 'pendiente' LIMIT 1
+        """, (id_usuario,))
+        pedido = cursor.fetchone()
+
+        if not pedido:
+            cursor.execute("""
+                INSERT INTO pedidos (id_usuario, fecha_pedido, estado, metodo_pago)
+                VALUES (%s, NOW(), 'pendiente', 'No definido')
+            """, (id_usuario,))
+            db.connection.commit()
+            cursor.execute("SELECT LAST_INSERT_ID()")
+            id_pedido = cursor.fetchone()[0]
+        else:
+            id_pedido = pedido[0]
+
+        # Buscar si ya existe un detalle del mismo producto
         cursor.execute("""
             SELECT id_detalle FROM detalle_pedido
             WHERE id_pedido = %s AND id_producto = %s
@@ -208,11 +222,14 @@ def subir_boceto(id_producto):
             """, (id_pedido, id_producto, ruta_archivo))
 
         db.connection.commit()
+        print(f"✅ Boceto guardado en {ruta_archivo} para usuario {id_usuario}")
         return jsonify(success=True, ruta=ruta_archivo)
+
     except Exception as e:
         db.connection.rollback()
         print(f"❌ ERROR SQL BOCETO: {e}")
         return jsonify(success=False, message=str(e)), 500
+    
 
 @productos_bp.route('/guardar_plantilla/<int:id_producto>', methods=['POST'])
 def guardar_plantilla(id_producto):
@@ -225,7 +242,24 @@ def guardar_plantilla(id_producto):
             return jsonify(success=False, message="No se recibieron datos de la plantilla."), 400
 
         cursor = db.connection.cursor()
-        id_pedido = obtener_pedido_pendiente(cursor, id_usuario)
+
+        # Buscar o crear pedido pendiente
+        cursor.execute("""
+            SELECT id_pedido FROM pedidos
+            WHERE id_usuario = %s AND estado = 'pendiente' LIMIT 1
+        """, (id_usuario,))
+        pedido = cursor.fetchone()
+
+        if not pedido:
+            cursor.execute("""
+                INSERT INTO pedidos (id_usuario, fecha_pedido, estado, metodo_pago)
+                VALUES (%s, NOW(), 'pendiente', 'No definido')
+            """, (id_usuario,))
+            db.connection.commit()
+            cursor.execute("SELECT LAST_INSERT_ID()")
+            id_pedido = cursor.fetchone()[0]
+        else:
+            id_pedido = pedido[0]
 
         cursor.execute("""
             SELECT id_detalle FROM detalle_pedido
@@ -249,10 +283,12 @@ def guardar_plantilla(id_producto):
 
         db.connection.commit()
         return jsonify(success=True, message="Plantilla guardada correctamente")
+
     except Exception as e:
         db.connection.rollback()
         print(f"❌ ERROR SQL PLANTILLA: {e}")
         return jsonify(success=False, message=str(e)), 500
+    
 
 @productos_bp.route('/registrar_formulario/<int:id_producto>', methods=['POST'])
 @login_required
@@ -261,16 +297,90 @@ def registrar_formulario(id_producto):
         conn = current_app.db.connection
         cursor = conn.cursor()
 
-        id_usuario = current_user.id_usuario
-        id_pedido = obtener_pedido_pendiente(cursor, id_usuario)
+        cursor.execute("""
+            SELECT id_pedido 
+            FROM pedidos 
+            WHERE id_usuario = %s AND estado = 'pendiente'
+            ORDER BY fecha_pedido DESC 
+            LIMIT 1
+        """, (current_user.id_usuario,))
+        pedido = cursor.fetchone()
+
+        if not pedido:
+            return jsonify(success=False, message="No se encontró un pedido activo o pendiente.")
+
+        id_pedido = pedido[0]
 
         cursor.execute("""
-            UPDATE detalle_pedido
+            UPDATE detalle_pedido 
             SET formulario_seleccionado = %s
             WHERE id_pedido = %s AND id_producto = %s
         """, ("Formulario guiado de Google completado", id_pedido, id_producto))
         conn.commit()
+
         return jsonify(success=True)
+
     except Exception as e:
         print(f"❌ Error al registrar formulario: {e}")
         return jsonify(success=False, message=str(e)), 500
+
+
+# ===============================================================
+# === NUEVA RUTA: AGREGAR PRODUCTO NORMAL AL CARRITO ============
+# ===============================================================
+
+@productos_bp.route('/carrito/agregar/<int:id_producto>', methods=['POST'])
+@login_required
+def agregar_al_carrito(id_producto):
+    db = current_app.db
+    try:
+        cursor = db.connection.cursor()
+        id_usuario = current_user.id_usuario
+
+        # Buscar pedido pendiente
+        cursor.execute("""
+            SELECT id_pedido FROM pedidos
+            WHERE id_usuario = %s AND estado = 'pendiente' LIMIT 1
+        """, (id_usuario,))
+        pedido = cursor.fetchone()
+
+        if not pedido:
+            cursor.execute("""
+                INSERT INTO pedidos (id_usuario, fecha_pedido, estado, metodo_pago)
+                VALUES (%s, NOW(), 'pendiente', 'No definido')
+            """, (id_usuario,))
+            db.connection.commit()
+            cursor.execute("SELECT LAST_INSERT_ID()")
+            id_pedido = cursor.fetchone()[0]
+        else:
+            id_pedido = pedido[0]
+
+        # Verificar si ya está en el carrito
+        cursor.execute("""
+            SELECT id_detalle, cantidad FROM detalle_pedido
+            WHERE id_pedido = %s AND id_producto = %s
+        """, (id_pedido, id_producto))
+        detalle = cursor.fetchone()
+
+        if detalle:
+            nueva_cantidad = detalle[1] + 1
+            cursor.execute("""
+                UPDATE detalle_pedido
+                SET cantidad = %s
+                WHERE id_detalle = %s
+            """, (nueva_cantidad, detalle[0]))
+        else:
+            cursor.execute("""
+                INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad)
+                VALUES (%s, %s, 1)
+            """, (id_pedido, id_producto))
+
+        db.connection.commit()
+        flash("Producto agregado correctamente al carrito", "success")
+        return redirect(url_for('carrito_bp.ver'))
+
+    except Exception as e:
+        db.connection.rollback()
+        print(f"❌ Error al agregar al carrito: {e}")
+        flash("Error al agregar el producto al carrito", "danger")
+        return redirect(url_for('productos_bp.productos'))

@@ -140,7 +140,6 @@
     color: white !important; 
   }
 
-  /* Tabs */
   .tabs-custom { 
     margin: 30px 0; 
     text-align: center; 
@@ -163,15 +162,6 @@
     box-shadow: 0 4px 12px rgba(0,128,255,0.3); 
   }
 
-  .main-title { 
-    color: #333; 
-    font-weight: 600; 
-    margin-bottom: 10px; 
-  }
-  .main-description { 
-    color: #666; 
-    font-size: 16px; 
-  }
   .home-container { 
     background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,249,250,0.8)); 
     padding: 30px; 
@@ -187,21 +177,15 @@
     border: none; 
     border-radius: 15px; 
     padding: 40px; 
-    display:none; 
-  }
-
-  .filter-container .form-select,
-  .filter-container .form-control {
-    max-width: 250px;
+    display: none; 
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Contenido principal -->
 <div class="container home-container text-center my-4">
-  <h5 class="main-title"><strong>Bienvenidos a Hand&Genius - {{ current_user.nombre_completo }}</strong></h5>
-  <p class="main-description">Aplicativo web pensado especialmente para personas jóvenes como tú, que les interese brindar regalos creativos y personalizados.</p>
+  <h5><strong>Bienvenido a Hand&Genius - {{ current_user.nombre_completo }}</strong></h5>
+  <p>Aplicativo web pensado especialmente para jóvenes creativos que desean ofrecer regalos personalizados y únicos.</p>
 
   <!-- Botones de categoría -->
   <div class="tabs-custom">
@@ -211,7 +195,7 @@
 
   <!-- FILTRO DE PRODUCTOS -->
   <div class="filter-container my-4 d-flex flex-wrap justify-content-center gap-3">
-    <select class="form-select" aria-label="Filtro por categoría" id="categoriaFiltro" name="categoria">
+    <select class="form-select" id="categoriaFiltro" name="categoria">
       <option value="">Todas las categorías</option>
       {% for categoria in categorias %}
         <option value="{{ categoria.id_categoria }}">{{ categoria.nombre }}</option>
@@ -221,14 +205,16 @@
     <button class="btn btn-primary" id="btnFiltrar">Filtrar</button>
   </div>
 
-  <!-- Contenedor de productos -->
+  <!-- CONTENEDOR DE PRODUCTOS -->
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4" id="productosContainer">
     {% for producto in productos %}
     <div class="col producto-item" data-categoria="{{ producto.id_categoria }}" data-nombre="{{ producto.nombre|lower }}">
       <div class="product-card">
         <div class="product-image-container">
           {% if producto.imagen %}
-            <img src="{{ producto.imagen }}" alt="{{ producto.nombre }}" class="product-image">
+            <img src="{{ url_for('static', filename=producto.imagen) }}" 
+                 alt="{{ producto.nombre }}" 
+                 class="product-image">
           {% else %}
             <i class="bi bi-image no-image-placeholder"></i>
           {% endif %}
@@ -259,8 +245,6 @@
 </div>
 
 <script>
-  const btnProductos = document.getElementById('btnProductos');
-  const btnFabricacion = document.getElementById('btnFabricacion');
   const productosItems = Array.from(document.querySelectorAll('.producto-item'));
   const btnFiltrar = document.getElementById('btnFiltrar');
   const categoriaFiltro = document.getElementById('categoriaFiltro');
@@ -272,29 +256,26 @@
     productosItems.forEach(producto => {
       const cat = producto.dataset.categoria;
       const nom = producto.dataset.nombre;
-
       let mostrar = true;
-      if(categoriasPermitidas && !categoriasPermitidas.includes(cat)) mostrar = false;
-      if(nombre && !nom.includes(nombre.toLowerCase())) mostrar = false;
+
+      if (categoriasPermitidas && !categoriasPermitidas.includes(cat)) mostrar = false;
+      if (nombre && !nom.includes(nombre.toLowerCase())) mostrar = false;
 
       producto.style.display = mostrar ? "block" : "none";
-      if(mostrar) visibles++;
+      if (mostrar) visibles++;
     });
+
     alertaNoProductos.style.display = visibles === 0 ? "block" : "none";
   }
 
-  // Botones categorías
-  btnProductos.addEventListener('click', () => filtrarProductos(["1","2","3"], nombreFiltro.value));
-  btnFabricacion.addEventListener('click', () => filtrarProductos(["4","5"], nombreFiltro.value));
-
-  // Filtro por inputs
+  document.getElementById('btnProductos').addEventListener('click', () => filtrarProductos(["1","2","3"], nombreFiltro.value));
+  document.getElementById('btnFabricacion').addEventListener('click', () => filtrarProductos(["4","5"], nombreFiltro.value));
   btnFiltrar.addEventListener('click', () => {
     const catValue = categoriaFiltro.value ? [categoriaFiltro.value] : null;
     const nombreValue = nombreFiltro.value.trim() || null;
     filtrarProductos(catValue, nombreValue);
   });
 
-  // Mostrar productos por defecto (Productos 1,2,3)
   filtrarProductos(["1","2","3"]);
 </script>
 {% endblock %}

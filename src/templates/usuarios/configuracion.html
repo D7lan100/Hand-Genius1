@@ -235,10 +235,11 @@
     </div>
 </div>
 
-<!-- JS PARA MANEJAR SUBIDA DE PRODUCTOS -->
+<!-- ✅ JS PARA MANEJAR SUBIDA DE PRODUCTOS Y ALERTA GLOBAL -->
 <script>
 document.getElementById('form-producto').addEventListener('submit', async function(e) {
     e.preventDefault();
+
     const form = e.target;
     const formData = new FormData(form);
 
@@ -247,31 +248,44 @@ document.getElementById('form-producto').addEventListener('submit', async functi
             method: "POST",
             body: formData
         });
+
         const data = await response.json();
 
         if (data.success) {
             mostrarFlash('success', data.mensaje || 'Producto agregado correctamente.');
             form.reset();
         } else {
-            mostrarFlash('error', data.mensaje || 'Error al agregar el producto.');
+            mostrarFlash('danger', data.error || 'Error al agregar el producto.');
         }
-    } catch (err) {
-        mostrarFlash('warning', 'No se pudo conectar con el servidor.');
-        console.error(err);
+    } catch (error) {
+        mostrarFlash('warning', '⚠ No se pudo conectar con el servidor.');
+        console.error("Error:", error);
     }
 });
 
-// ✅ Usa las alertas del base.html
+// ✅ Usa el contenedor global del base.html
 function mostrarFlash(tipo, mensaje) {
-    const flashContainer = document.getElementById('flashContainer');
-    if (!flashContainer) return;
+    let flashContainer = document.getElementById('flashContainer');
+
+    // Si no existe (por seguridad), se crea
+    if (!flashContainer) {
+        flashContainer = document.createElement('div');
+        flashContainer.id = 'flashContainer';
+        flashContainer.style.position = 'fixed';
+        flashContainer.style.top = '90px';
+        flashContainer.style.right = '20px';
+        flashContainer.style.zIndex = '9999';
+        flashContainer.style.maxWidth = '350px';
+        document.body.appendChild(flashContainer);
+    }
 
     const alert = document.createElement('div');
-    alert.className = `alert alert-${tipo === 'error' ? 'danger' : tipo} alert-dismissible fade show shadow-lg mb-2`;
+    alert.className = `alert alert-${tipo} alert-dismissible fade show shadow-lg mb-2`;
+    alert.setAttribute('role', 'alert');
     alert.style.animation = 'slideIn 0.3s ease';
     alert.innerHTML = `
         <strong>
-            ${tipo === 'error' ? '<i class="bi bi-exclamation-triangle-fill me-2"></i>Error' :
+            ${tipo === 'danger' ? '<i class="bi bi-exclamation-triangle-fill me-2"></i>Error' :
               tipo === 'success' ? '<i class="bi bi-check-circle-fill me-2"></i>Éxito' :
               tipo === 'warning' ? '<i class="bi bi-exclamation-circle-fill me-2"></i>Atención' :
               '<i class="bi bi-info-circle-fill me-2"></i>Información'}
@@ -281,11 +295,12 @@ function mostrarFlash(tipo, mensaje) {
     `;
     flashContainer.appendChild(alert);
 
-    // Animación de salida
+    // Desaparece con animación
     setTimeout(() => {
         alert.style.animation = 'fadeOut 0.3s ease';
         setTimeout(() => {
-            alert.remove();
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
         }, 300);
     }, 5000);
 }

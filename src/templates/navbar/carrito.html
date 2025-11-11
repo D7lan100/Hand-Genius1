@@ -4,59 +4,92 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">🛒 Carrito de Compras</h2>
+  <h2 class="mb-4">🛒 Carrito de Compras</h2>
 
-    {% if productos %}
-        <table class="table table-bordered table-hover text-center align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>Imagen</th>
-                    <th>Producto</th>
-                    <th>Precio</th>
-                    <th>Cantidad</th>
-                    <th>Subtotal</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in productos %}
-                <tr>
-                    <td>
-                        {% if item.imagen %}
-                            <img src="{{ url_for('static', filename='uploads/' ~ item.imagen) }}" alt="{{ item.nombre }}" width="70">
-                        {% else %}
-                            <span class="text-muted">Sin imagen</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ item.nombre }}</td>
-                    <td>${{ "%.2f"|format(item.precio) }}</td>
-                    <td>{{ item.cantidad }}</td>
-                    <td><strong>${{ "%.2f"|format(item.subtotal) }}</strong></td>
-                    <td>
-                        <form action="{{ url_for('carrito_bp.eliminar', id_producto=item.id_producto) }}" method="POST" style="display:inline;">
-                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+  {% if productos %}
+  <table class="table table-bordered table-hover text-center align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>Imagen</th>
+        <th>Producto</th>
+        <th>Precio</th>
+        <th>Cantidad</th>
+        <th>Subtotal</th>
+        <th>Personalización</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in productos %}
+      <tr>
+        <td>
+          {% if item.imagen %}
+            <img src="{{ url_for('static', filename='uploads/' ~ item.imagen) }}" 
+                 alt="{{ item.nombre }}" width="70" class="rounded">
+          {% else %}
+            <span class="text-muted">Sin imagen</span>
+          {% endif %}
+        </td>
+        <td>{{ item.nombre }}</td>
+        <td>${{ "%.2f"|format(item.precio) }}</td>
+        <td>{{ item.cantidad }}</td>
+        <td><strong>${{ "%.2f"|format(item.subtotal) }}</strong></td>
 
-        <div class="d-flex justify-content-between align-items-center mt-3">
-            <h4>Total: <strong>${{ "%.2f"|format(total) }}</strong></h4>
-            <div>
-                <form action="{{ url_for('carrito_bp.vaciar') }}" method="POST" style="display:inline;">
-                    <button type="submit" class="btn btn-warning">Vaciar Carrito</button>
-                </form>
-                <form action="{{ url_for('carrito_bp.checkout') }}" method="POST" style="display:inline;">
-                    <button type="submit" class="btn btn-success">Finalizar Compra</button>
-                </form>
-            </div>
-        </div>
-    {% else %}
-        <div class="alert alert-info text-center">
-            Tu carrito está vacío. <a href="{{ url_for('productos_bp.productos') }}" class="alert-link">Ver productos</a>
-        </div>
-    {% endif %}
+        <!-- 🧩 Personalización -->
+        <td class="text-start">
+          {% if item.texto %}
+            <p><i class="bi bi-pencil"></i> <strong>Texto:</strong> {{ item.texto }}</p>
+          {% endif %}
+          {% if item.plantilla %}
+            <p><i class="bi bi-flower3"></i> <strong>Plantilla:</strong> 
+              {{ item.plantilla | truncate(60, True, '...') }}
+            </p>
+          {% endif %}
+          {% if item.boceto %}
+            <p><i class="bi bi-image"></i> 
+              <a href="{{ url_for('static', filename=item.boceto.replace('src\\static\\', '').replace('src/static/', '')) }}"
+                 target="_blank" class="btn btn-sm btn-outline-primary">
+                 Ver imagen
+              </a>
+            </p>
+          {% endif %}
+          {% if item.formulario %}
+            <p><i class="bi bi-ui-checks"></i> <strong>Formulario:</strong> Enviado</p>
+          {% endif %}
+          {% if not item.texto and not item.plantilla and not item.boceto and not item.formulario %}
+            <span class="text-muted">Sin personalización</span>
+          {% endif %}
+        </td>
+
+        <!-- Botones de acción -->
+        <td>
+          <form action="{{ url_for('carrito_bp.eliminar', id_detalle=item.id_detalle) }}" method="POST" style="display:inline;">
+            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- 🔹 Total, vaciar y finalizar -->
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <h4>Total: <strong>${{ "%.2f"|format(total) }}</strong></h4>
+    <div>
+      <form action="{{ url_for('carrito_bp.vaciar') }}" method="POST" style="display:inline;">
+        <button type="submit" class="btn btn-warning">Vaciar Carrito</button>
+      </form>
+      <form action="{{ url_for('carrito_bp.checkout') }}" method="POST" style="display:inline;">
+        <button type="submit" class="btn btn-success">Finalizar Compra</button>
+      </form>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="alert alert-info text-center">
+    Tu carrito está vacío. 
+    <a href="{{ url_for('productos_bp.productos') }}" class="alert-link">Ver productos</a>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

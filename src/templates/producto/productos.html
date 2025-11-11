@@ -202,44 +202,41 @@
       {% for producto in productos %}
         <div class="col d-flex">
           <div class="product-card w-100 d-flex flex-column">
-            <!-- Imagen -->
             <div class="product-image-container">
               {% if producto.imagen %}
-                <img src="{{ producto.imagen }}" class="product-image" alt="{{ producto.nombre }}">
+                <img src="{{ url_for('static', filename=producto.imagen.replace('static/', '')) }}" 
+                     class="product-image" alt="{{ producto.nombre }}">
               {% else %}
                 <div class="no-image-placeholder"><i class="bi bi-image"></i></div>
               {% endif %}
             </div>
 
-            <!-- Título y descripción -->
             <h5 class="product-title">{{ producto.nombre }}</h5>
             <p class="product-description">
-              {% if producto.descripcion and producto.descripcion|length > 80 %}
-                {{ producto.descripcion[:80] }}...
-              {% else %}
-                {{ producto.descripcion or "Producto increíble esperando por ti" }}
-              {% endif %}
+              {{ producto.descripcion or "Producto increíble esperando por ti" }}
             </p>
 
-            <!-- Precio -->
             <div class="product-price">${{ "%.2f"|format(producto.precio) }}</div>
 
-            <!-- Badges -->
             <div class="product-badges">
-              {% if producto.disponible %}<span class="badge-custom badge-available"><i class="bi bi-check-circle"></i> Disponible</span>{% else %}<span class="badge-custom badge-unavailable"><i class="bi bi-x-circle"></i> Agotado</span>{% endif %}
-              {% if producto.es_personalizable %}<span class="badge-custom badge-customizable"><i class="bi bi-palette"></i> Personalizable</span>{% endif %}
+              {% if producto.disponible %}
+                <span class="badge-custom badge-available"><i class="bi bi-check-circle"></i> Disponible</span>
+              {% else %}
+                <span class="badge-custom badge-unavailable"><i class="bi bi-x-circle"></i> Agotado</span>
+              {% endif %}
+              {% if producto.es_personalizable %}
+                <span class="badge-custom badge-customizable"><i class="bi bi-palette"></i> Personalizable</span>
+              {% endif %}
             </div>
 
-            <!-- Formulario agregar al carrito -->
             {% if producto.disponible %}
+            <!-- 🔹 Formulario funcional para agregar al carrito -->
             <form action="{{ url_for('carrito_bp.agregar', id_producto=producto.id_producto) }}" method="POST" class="form-add-cart">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <input type="number" name="cantidad" value="1" min="1">
+              <input type="number" name="cantidad" value="1" min="1" required>
               <button type="submit" class="btn-cart"><i class="bi bi-cart-plus"></i> Agregar</button>
             </form>
             {% endif %}
 
-            <!-- Botón ver detalles -->
             <a href="{{ url_for('productos_bp.detalle_producto', id=producto.id_producto) }}" class="btn-details mt-auto">
               <i class="bi bi-eye"></i> Ver detalles
             </a>

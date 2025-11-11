@@ -1,87 +1,114 @@
 {% extends "base.html" %}
-{% block title %}Personaliza {{ producto.nombre }} - HandiGenius{% endblock %}
+{% block title %}Panel de Personalización - HandiGenius{% endblock %}
 
 {% block content %}
 <style>
-  .personalizar-container {
-    margin-top: 30px;
-    background: white;
+  .panel-container {
+    margin-top: 40px;
+    padding: 30px;
     border-radius: 20px;
-    padding: 25px;
+    background: white;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   }
 
-  .personalizar-grid {
+  .opciones-grid {
     display: grid;
-    grid-template-columns: 1fr 350px;
-    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
   }
 
-  .preview-area {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #f9fafb;
+  .opcion-card {
+    background: #f8faff;
     border-radius: 15px;
-    padding: 20px;
-  }
-
-  .preview-area img {
-    max-width: 350px;
-    position: absolute;
-    transition: opacity 0.3s ease;
-  }
-
-  .opciones-panel {
-    background: #f5f7fa;
-    border-radius: 20px;
-    padding: 20px;
-  }
-
-  .selector {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 15px 0;
-  }
-
-  .selector button {
-    background: #0080FF;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 35px;
-    height: 35px;
-    font-size: 18px;
-    transition: background 0.2s;
-  }
-
-  .selector button:hover {
-    background: #0066CC;
-  }
-
-  .btn-save {
-    background: linear-gradient(135deg, #0080FF, #3399FF);
-    color: white;
-    border: none;
-    border-radius: 15px;
-    padding: 10px 20px;
-    font-weight: 600;
-    width: 100%;
+    padding: 25px;
+    text-align: center;
     transition: all 0.3s;
+    cursor: pointer;
+    position: relative;
+    border: 1px solid #e0e6f1;
   }
 
-  .btn-save:hover {
-    background: linear-gradient(135deg, #0066CC, #2685E6);
+  .opcion-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    border-color: #cce0ff;
+  }
+
+  .opcion-card i {
+    font-size: 42px;
+    color: #007bff;
+    margin-bottom: 15px;
+  }
+
+  /* Botón Enviar / Subir */
+  .btn-enviar {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 25px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+  }
+
+  .btn-enviar:hover {
+    background-color: #0056b3;
     transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 123, 255, 0.4);
+  }
+
+  textarea {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid #ccd8eb;
+    padding: 10px;
+    resize: none;
+    font-size: 15px;
+    transition: border 0.3s ease;
+  }
+
+  textarea:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0,123,255,0.3);
+  }
+
+  /* Estilo sobrio para input file */
+  input[type="file"] {
+    display: block;
+    margin: 10px auto;
+    border: 1px solid #dcdfe6;
+    border-radius: 10px;
+    padding: 8px;
+    background-color: #f9fbff;
+    font-size: 14px;
+    width: 90%;
+    cursor: pointer;
+    color: #555;
+  }
+
+  input[type="file"]::file-selector-button {
+    background-color: #f2f4f8;
+    color: #333;
+    border: 1px solid #d0d5dc;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+
+  input[type="file"]::file-selector-button:hover {
+    background-color: #e6e8ed;
   }
 
   .btn-volver {
     position: fixed !important;
-    top: 80px; /* baja un poco para no chocar con el navbar */
+    top: 80px;
     left: 25px;
-    background-color: #007bff !important; /* Azul igual al navbar */
+    background-color: #007bff !important;
     color: #fff !important;
     padding: 10px 18px;
     border-radius: 12px;
@@ -100,7 +127,6 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 14px rgba(0, 123, 255, 0.45);
     color: #fff !important;
-    text-decoration: none !important;
   }
 
   .btn-volver i {
@@ -108,176 +134,255 @@
   }
 </style>
 
-<a href="{{ url_for('productos_bp.panel_personalizacion', id_producto=producto.id_producto) }}" 
+<a href="{{ url_for('productos_bp.detalle_producto', id=id_producto) }}" 
    class="btn-volver">
-  <i class="bi bi-arrow-left"></i> Volver al panel 
+  <i class="bi bi-arrow-left"></i> Volver al producto
 </a>
 
-<div class="container personalizar-container">
-  <h1 class="text-center mb-4">
-    <i class="bi bi-palette"></i> Personaliza tu {{ producto.nombre }}
-  </h1>
+<div class="container panel-container">
+  <h2 class="text-center mb-4">
+    <i class="bi bi-brush"></i> Elige tu tipo de personalización
+  </h2>
 
-  <div class="personalizar-grid">
-    <!-- Vista previa -->
-    <div class="preview-area">
-      <!-- Imagen base -->
-      <img id="base" src="{{ url_for('static', filename='personalizacion/base_ramo.png') }}" alt="Ramo base">
-
-      <!-- Capas -->
-      <img id="flores" src="{{ url_for('static', filename='personalizacion/flores_rojas.png') }}" alt="Flores principales">
-      <img id="secundarias" src="{{ url_for('static', filename='personalizacion/glipsofila.png') }}" alt="Flores secundarias">
-      <img id="papel" src="{{ url_for('static', filename='personalizacion/papel_kraft.png') }}" alt="Papel">
-      <img id="cinta" src="{{ url_for('static', filename='personalizacion/cinta_azul.png') }}" alt="Cinta">
+  <div class="opciones-grid">
+    <!-- Opción 1 -->
+    <div class="opcion-card" onclick="window.location.href='{{ url_for('productos_bp.personalizar', id_producto=id_producto) }}'">
+        <i class="bi bi-flower3"></i>
+        <h5>Plantilla de personalización</h5>
+        <p>Elige los colores, flores y cinta de forma interactiva.</p>
     </div>
 
-    <!-- Panel -->
-    <div class="opciones-panel">
-      <h4><i class="bi bi-flower3"></i> Flores principales</h4>
-      <div class="selector">
-        <button id="prevFlores">←</button>
-        <span id="floresNombre">Rojas</span>
-        <button id="nextFlores">→</button>
-      </div>
+    <!-- Opción 2 -->
+    <div class="opcion-card" id="textoLibreCard">
+      <i class="bi bi-pencil-square"></i>
+      <h5>Texto Libre</h5>
+      <p>Escribe detalladamente cómo te gustaría personalizar tu producto.</p>
 
-      <h4><i class="bi bi-flower2"></i> Flores secundarias</h4>
-      <div class="selector">
-        <button id="prevSecundarias">←</button>
-        <span id="secundariasNombre">Glipsofila</span>
-        <button id="nextSecundarias">→</button>
-      </div>
+      <form id="formTextoLibre" style="display:none;">
+        <textarea id="textoPersonalizado" name="texto_personalizado" rows="4" placeholder="Describe tu idea aquí..." required></textarea>
+        <button type="submit" class="btn-enviar mt-2">Enviar</button>
+      </form>
+    </div>
 
-      <h4><i class="bi bi-file-earmark"></i> Papel</h4>
-      <div class="selector">
-        <button id="prevPapel">←</button>
-        <span id="papelNombre">Kraft</span>
-        <button id="nextPapel">→</button>
-      </div>
+    <!-- Opción 3 -->
+    <div class="opcion-card" id="bocetoCard">
+      <i class="bi bi-upload"></i>
+      <h5>Subir Boceto</h5>
+      <p>Sube una imagen o dibujo de cómo quieres tu producto.</p>
 
-      <h4><i class="bi bi-ribbon"></i> Cinta</h4>
-      <div class="selector">
-        <button id="prevCinta">←</button>
-        <span id="cintaNombre">Azul</span>
-        <button id="nextCinta">→</button>
-      </div>
+      <form id="formBoceto" enctype="multipart/form-data" style="display:none;">
+        <input type="file" id="imagenBoceto" name="imagen_personalizada" accept="image/*" required>
+        <button type="submit" class="btn-enviar">Subir Boceto</button>
+      </form>
+    </div>
 
-      <button id="guardarPersonalizacion" class="btn-save mt-4">
-        <i class="bi bi-check-circle"></i> Guardar personalización
-      </button>
+    <!-- Opción 4 -->
+    <div class="opcion-card" id="formularioGuiado">
+      <i class="bi bi-ui-checks"></i>
+      <h5>Formulario Guiado</h5>
+      <p>Responde unas preguntas para que creemos tu diseño ideal.</p>
     </div>
   </div>
 </div>
 
 <script>
-  const opciones = {
-    flores: [
-      { nombre: "Rojas", src: "{{ url_for('static', filename='personalizacion/flores_rojas.png') }}" },
-      { nombre: "Azules", src: "{{ url_for('static', filename='personalizacion/flores_azules.png') }}" },
-      { nombre: "Amarillas", src: "{{ url_for('static', filename='personalizacion/flores_amarillas.png') }}" },
-      { nombre: "Rosadas", src: "{{ url_for('static', filename='personalizacion/flores_rosadas.png') }}" },
-      { nombre: "Moradas", src: "{{ url_for('static', filename='personalizacion/flores_moradas.png') }}" },
-      { nombre: "Blancas", src: "{{ url_for('static', filename='personalizacion/flores_blancas.png') }}" }
-    ],
-    secundarias: [
-      { nombre: "Glipsofila", src: "{{ url_for('static', filename='personalizacion/glipsofila.png') }}" },
-      { nombre: "Limonium", src: "{{ url_for('static', filename='personalizacion/limonium.png') }}" },
-      { nombre: "Asparagus", src: "{{ url_for('static', filename='personalizacion/asparagus.png') }}" },
-      { nombre: "Ruscus", src: "{{ url_for('static', filename='personalizacion/ruscus.png') }}" },
-      { nombre: "Solidago", src: "{{ url_for('static', filename='personalizacion/solidago.png') }}" },
-      { nombre: "Escabiosa", src: "{{ url_for('static', filename='personalizacion/escabiosa.png') }}" }
-    ],
-    papel: [
-      { nombre: "Kraft", src: "{{ url_for('static', filename='personalizacion/papel_kraft.png') }}" },
-      { nombre: "Rosado", src: "{{ url_for('static', filename='personalizacion/papel_rosado.png') }}" },
-      { nombre: "Azul Claro", src: "{{ url_for('static', filename='personalizacion/papel_azul_claro.png') }}" },
-      { nombre: "Negro", src: "{{ url_for('static', filename='personalizacion/papel_negro.png') }}" },
-      { nombre: "Blanco", src: "{{ url_for('static', filename='personalizacion/papel_blanco.png') }}" }
-    ],
-    cinta: [
-      { nombre: "Azul", src: "{{ url_for('static', filename='personalizacion/cinta_azul.png') }}" },
-      { nombre: "Amarilla", src: "{{ url_for('static', filename='personalizacion/cinta_amarilla.png') }}" },
-      { nombre: "Roja", src: "{{ url_for('static', filename='personalizacion/cinta_roja.png') }}" },
-      { nombre: "Rosa", src: "{{ url_for('static', filename='personalizacion/cinta_rosa.png') }}" },
-      { nombre: "Blanca", src: "{{ url_for('static', filename='personalizacion/cinta_blanca.png') }}" },
-      { nombre: "Negra", src: "{{ url_for('static', filename='personalizacion/cinta_negra.png') }}" }
-    ]
-  };
+document.addEventListener("DOMContentLoaded", () => {
+  const textoLibreCard = document.getElementById("textoLibreCard");
+  const formTextoLibre = document.getElementById("formTextoLibre");
+  const bocetoCard = document.getElementById("bocetoCard");
+  const formBoceto = document.getElementById("formBoceto");
+  const formularioGuiado = document.getElementById("formularioGuiado");
 
-  const indices = { flores: 0, secundarias: 0, papel: 0, cinta: 0 };
-
-  function actualizarVista(tipo) {
-    document.getElementById(tipo).src = opciones[tipo][indices[tipo]].src;
-    document.getElementById(`${tipo}Nombre`).innerText = opciones[tipo][indices[tipo]].nombre;
-  }
-
-  function cambiar(tipo, dir) {
-    indices[tipo] = (indices[tipo] + dir + opciones[tipo].length) % opciones[tipo].length;
-    actualizarVista(tipo);
-  }
-
-  document.getElementById("prevFlores").onclick = () => cambiar("flores", -1);
-  document.getElementById("nextFlores").onclick = () => cambiar("flores", 1);
-  document.getElementById("prevSecundarias").onclick = () => cambiar("secundarias", -1);
-  document.getElementById("nextSecundarias").onclick = () => cambiar("secundarias", 1);
-  document.getElementById("prevPapel").onclick = () => cambiar("papel", -1);
-  document.getElementById("nextPapel").onclick = () => cambiar("papel", 1);
-  document.getElementById("prevCinta").onclick = () => cambiar("cinta", -1);
-  document.getElementById("nextCinta").onclick = () => cambiar("cinta", 1);
-
-document.getElementById("guardarPersonalizacion").onclick = async () => {
-  const plantilla = {
-    flores: opciones.flores[indices.flores].nombre,
-    flores_url: opciones.flores[indices.flores].src,
-    secundarias: opciones.secundarias[indices.secundarias].nombre,
-    papel: opciones.papel[indices.papel].nombre,
-    cinta: opciones.cinta[indices.cinta].nombre
-  };
-
-  const confirmacion = await Swal.fire({
-    title: "¿Guardar personalización?",
-    text: "¿Deseas guardar los cambios realizados a tu producto?",
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonText: "Sí, guardar",
-    cancelButtonText: "Cancelar",
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#d33"
+  // Mostrar/ocultar texto libre
+  textoLibreCard.addEventListener("click", (e) => {
+    if (e.target.closest("form")) return;
+    formTextoLibre.style.display =
+      formTextoLibre.style.display === "none" ? "block" : "none";
   });
 
-  if (!confirmacion.isConfirmed) return;
+  // Mostrar/ocultar subir boceto
+  bocetoCard.addEventListener("click", (e) => {
+    if (e.target.closest("form")) return;
+    formBoceto.style.display =
+      formBoceto.style.display === "none" ? "block" : "none";
+  });
 
-  try {
-    const response = await fetch(`/guardar_plantilla/{{ producto.id_producto }}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(plantilla)
-    });
+  // Enviar texto libre con confirmación moderna
+  formTextoLibre.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-    const result = await response.json();
-    if (result.success) {
+    const texto = document.getElementById("textoPersonalizado").value.trim();
+    if (!texto) {
       Swal.fire({
-        title: "✅ ¡Guardado con éxito!",
-        text: "Tu personalización fue registrada correctamente.",
-        icon: "success",
+        title: "⚠️ Campo vacío",
+        text: "Por favor escribe un texto antes de enviar.",
+        icon: "warning",
         confirmButtonColor: "#3085d6"
       });
-    } else {
+      return;
+    }
+
+    const confirmacion = await Swal.fire({
+      title: "¿Guardar texto personalizado?",
+      text: "¿Deseas guardar esta descripción en tu pedido?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sí, guardar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33"
+    });
+
+    if (!confirmacion.isConfirmed) return;
+
+    try {
+      const response = await fetch(`/guardar_texto_personalizado/{{ id_producto }}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `texto_personalizado=${encodeURIComponent(texto)}`
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        Swal.fire({
+          title: "✅ ¡Guardado con éxito!",
+          text: "Tu texto personalizado fue registrado correctamente.",
+          icon: "success",
+          confirmButtonColor: "#3085d6"
+        });
+      } else {
+        Swal.fire({
+          title: "❌ Error al guardar",
+          text: result.message,
+          icon: "error",
+          confirmButtonColor: "#d33"
+        });
+      }
+    } catch (error) {
       Swal.fire({
-        title: "❌ Error",
-        text: "Ocurrió un problema al guardar: " + result.message,
-        icon: "error",
+        title: "⚠️ Error de conexión",
+        text: "No se pudo conectar con el servidor.",
+        icon: "warning",
         confirmButtonColor: "#d33"
       });
     }
-  } catch (error) {
-    console.error("Error:", error);
-    Swal.fire({
-      title: "⚠️ Error de conexión",
-      text: "No se pudo conectar con el servidor.",
-      icon: "warning",
-      confirmButtonColor: "#d33"
+  });
+
+  // Subir boceto con confirmación moderna
+  formBoceto.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const file = document.getElementById("imagenBoceto").files[0];
+    if (!file) {
+      Swal.fire({
+        title: "⚠️ Archivo no seleccionado",
+        text: "Selecciona una imagen antes de subir.",
+        icon: "warning",
+        confirmButtonColor: "#3085d6"
+      });
+      return;
+    }
+
+    const confirmacion = await Swal.fire({
+      title: "¿Subir boceto?",
+      text: "¿Deseas guardar esta imagen como referencia personalizada?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sí, subir",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33"
     });
-  }
-};
+
+    if (!confirmacion.isConfirmed) return;
+
+    const formData = new FormData();
+    formData.append("imagen_personalizada", file);
+
+    try {
+      const response = await fetch(`/subir_boceto/{{ id_producto }}`, {
+        method: "POST",
+        body: formData
+      });
+
+      if (response.ok) {
+        Swal.fire({
+          title: "✅ ¡Boceto subido!",
+          text: "Tu imagen fue registrada correctamente.",
+          icon: "success",
+          confirmButtonColor: "#3085d6"
+        });
+      } else {
+        Swal.fire({
+          title: "❌ Error al subir",
+          text: "Ocurrió un problema al guardar el boceto.",
+          icon: "error",
+          confirmButtonColor: "#d33"
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "⚠️ Error de conexión",
+        text: "No se pudo conectar con el servidor.",
+        icon: "warning",
+        confirmButtonColor: "#d33"
+      });
+    }
+  });
+
+  // Registrar el formulario guiado del usuario
+  formularioGuiado.addEventListener("click", async () => {
+    const confirmacion = await Swal.fire({
+      title: "Abrir Formulario Guiado",
+      text: "¿Deseas abrir el formulario para personalizar tu producto?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sí, abrir",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33"
+    });
+
+    if (!confirmacion.isConfirmed) return;
+
+    // ⚠️ Nueva alerta informativa antes de abrir el formulario
+    await Swal.fire({
+      title: "📝 Importante",
+      text: "Por favor llena los datos del formulario con los mismos que usas en tu perfil de Hand&Genius. Esto permitirá asociar correctamente tu diseño personalizado.",
+      icon: "info",
+      confirmButtonText: "Entendido",
+      confirmButtonColor: "#3085d6"
+    });
+
+    try {
+      const response = await fetch(`/registrar_formulario/{{ id_producto }}`, {
+        method: "POST"
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        window.open(
+          "https://docs.google.com/forms/d/e/1FAIpQLSd_4_pbEEvv6_ctztJn_qK6pudaKtG2OHcybPEoQlucAm-aIA/viewform?usp=dialog",
+          "_blank"
+        );
+      } else {
+        Swal.fire({
+          title: "❌ Error",
+          text: "No se pudo registrar la acción en el sistema.",
+          icon: "error",
+          confirmButtonColor: "#d33"
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "⚠️ Error de conexión",
+        text: "No se pudo conectar con el servidor.",
+        icon: "warning",
+        confirmButtonColor: "#d33"
+      });
+    }
+  });
+});
 </script>
+
 {% endblock %}

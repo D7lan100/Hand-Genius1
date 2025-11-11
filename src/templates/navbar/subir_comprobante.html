@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Subir Comprobante de Pago{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="card shadow-lg border-0">
+    <div class="card-header bg-primary text-white text-center">
+      <h4 class="mb-0">💳 Confirmar Pago del Pedido #{{ id_pedido }}</h4>
+    </div>
+
+    <div class="card-body">
+      <p class="text-muted text-center mb-4">
+        Por favor, sube el comprobante de tu pago para procesar tu pedido.  
+        El equipo revisará el comprobante y actualizará el estado del pedido.
+      </p>
+
+      <form action="{{ url_for('carrito_bp.subir_comprobante', id_pedido=id_pedido) }}" 
+            method="POST" 
+            enctype="multipart/form-data" 
+            class="mx-auto" 
+            style="max-width: 600px;">
+
+        <!-- Método de pago -->
+        <div class="mb-3">
+          <label for="metodo_pago" class="form-label fw-bold">Método de pago</label>
+          <select class="form-select" id="metodo_pago" name="metodo_pago" required>
+            <option value="">Selecciona una opción</option>
+            <option value="Transferencia Bancaria">🏦 Transferencia Bancaria</option>
+            <option value="Nequi">📱 Nequi</option>
+            <option value="Daviplata">💰 Daviplata</option>
+            <option value="Efectivo">💵 Efectivo (contra entrega)</option>
+          </select>
+        </div>
+
+        <!-- Archivo comprobante -->
+        <div class="mb-3">
+          <label for="comprobante" class="form-label fw-bold">Comprobante de pago</label>
+          <input type="file" class="form-control" id="comprobante" name="comprobante" accept="image/*,application/pdf" required>
+          <div class="form-text">Puedes subir una imagen o PDF del comprobante.</div>
+        </div>
+
+        <!-- Botones -->
+        <div class="text-center mt-4">
+          <button type="submit" class="btn btn-success px-4">
+            <i class="bi bi-cloud-upload"></i> Enviar comprobante
+          </button>
+          <a href="{{ url_for('carrito_bp.ver') }}" class="btn btn-secondary px-4">
+            <i class="bi bi-arrow-left"></i> Volver al carrito
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

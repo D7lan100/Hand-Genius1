@@ -80,10 +80,10 @@ def create_app():
     csrf_exempt_endpoints = [
         'auth_bp.logout_redirect',
         'admin_bp.in_editar_usuario',
-        'admin_bp.admin_eliminar_usuario',
-        'admin_bp.admin_editar_producto',
-        'admin_bp.admin_eliminar_producto',
-        'admin_bp.admin_agregar_producto',
+        'admin_bp.agregar_producto',
+        'admin_bp.editar_producto',
+        'admin_bp.eliminar_producto',
+        'admin_bp.actualizar_pedido'
         'usuario_bp.actualizar_perfil',
         'api_bp.api_eventos',
         'api_bp.api_productos',
@@ -91,6 +91,7 @@ def create_app():
         'carrito_bp.vaciar',
         'carrito_bp.eliminar',
         'carrito_bp.checkout',
+        'carrito_bp.subir_comprobante',
         'navbar_bp.calendario',
         'suscripciones_bp.subir_comprobante',
         'admin_bp.aprobar_suscripcion',
@@ -100,7 +101,8 @@ def create_app():
         'productos_bp.guardar_texto_personalizado',
         'productos_bp.subir_boceto',
         'productos_bp.guardar_plantilla',
-        'productos_bp.registrar_formulario' 
+        'productos_bp.registrar_formulario',
+        'admin_bp.actualizar_pedido'
     ]
 
     for ep in csrf_exempt_endpoints:

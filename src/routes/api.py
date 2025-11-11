@@ -1,4 +1,3 @@
-# src/routes/api.py
 from flask import Blueprint, request, jsonify, current_app
 from flask_login import login_required, current_user
 from src.models.ModelProducto import ModelProducto
@@ -7,22 +6,28 @@ from functools import wraps
 from werkzeug.utils import secure_filename
 import os
 
-# =============================
+# ====================================================
 # CONFIGURACIÓN GENERAL
-# =============================
+# ====================================================
 api_bp = Blueprint('api_bp', __name__)
 
-UPLOAD_FOLDER = 'static/uploads/productos'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+# 📁 Carpeta de imágenes (usa la carpeta que ya tienes: static/img/productos)
+def get_upload_folder():
+    base_dir = os.path.dirname(os.path.abspath(__file__))  # src/routes/
+    static_folder = os.path.join(base_dir, '..', '..', 'static', 'img', 'productos')
+    static_folder = os.path.abspath(static_folder)
+    os.makedirs(static_folder, exist_ok=True)
+    return static_folder
 
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# =============================
+
+# ====================================================
 # DECORADOR: admin_required
-# =============================
+# ====================================================
 def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -33,9 +38,10 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
-# =============================
+
+# ====================================================
 # API PRODUCTOS
-# =============================
+# ====================================================
 @api_bp.route('/api/productos', methods=['GET', 'POST'])
 @login_required
 def api_productos():
@@ -52,7 +58,7 @@ def api_productos():
             per_page = min(per_page, 100)
             offset = (page - 1) * per_page
 
-            cursor = current_app.db.connection.cursor()
+            cursor = current_app.db.connection.cursor(dictionary=True)
 
             base_query = """
                 SELECT p.*, c.nombre as categoria_nombre, u.nombre_completo as vendedor_nombre
@@ -106,7 +112,6 @@ def api_productos():
         # MÉTODO POST
         # ----------------------------
         elif request.method == 'POST':
-            # 🔒 Permitir tanto usuarios (1) como administradores (2)
             if getattr(current_user, 'id_rol', None) not in [1, 2]:
                 return jsonify({'success': False, 'error': 'No tienes permisos para agregar productos'}), 403
 
@@ -120,43 +125,45 @@ def api_productos():
             if not nombre or not precio or not id_categoria:
                 return jsonify({'success': False, 'error': 'Faltan campos obligatorios (nombre, precio, categoría)'}), 400
 
-            # Guardar imagen si se subió
             imagen = None
             if 'imagen' in request.files:
                 file = request.files['imagen']
                 if file and allowed_file(file.filename):
                     filename = secure_filename(file.filename)
-                    ruta_imagen = os.path.join(UPLOAD_FOLDER, filename)
-                    file.save(ruta_imagen)
-                    imagen = '/' + ruta_imagen.replace('\\', '/')
+                    upload_folder = get_upload_folder()
+                    file_path = os.path.join(upload_folder, filename)
+                    file.save(file_path)
+                    # ✅ Ruta pública correcta
+                    imagen = f"img/productos/{filename}"
 
             cursor = current_app.db.connection.cursor()
             cursor.execute("""
                 INSERT INTO productos (nombre, descripcion, precio, id_categoria, id_vendedor, disponible, es_personalizable, imagen)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """, (nombre, descripcion, precio, id_categoria, current_user.id_usuario, disponible, es_personalizable, imagen))
-
             current_app.db.connection.commit()
             nuevo_id = cursor.lastrowid
             cursor.close()
 
             return jsonify({
                 'success': True,
-                'mensaje': 'Producto agregado correctamente',
-                'id_producto': nuevo_id
+                'mensaje': '✅ Producto agregado correctamente',
+                'id_producto': nuevo_id,
+                'imagen': imagen
             }), 201
 
     except Exception as e:
+        print(f"Error en /api/productos: {e}")
         return jsonify({'success': False, 'error': f'Error al agregar producto: {str(e)}'}), 500
 
 
-# =============================
+# ====================================================
 # DETALLE DE PRODUCTO
-# =============================
+# ====================================================
 @api_bp.route('/api/producto/<int:producto_id>', methods=['GET'])
 def api_producto_detalle(producto_id):
     try:
-        cursor = current_app.db.connection.cursor()
+        cursor = current_app.db.connection.cursor(dictionary=True)
         cursor.execute("""
             SELECT p.*, c.nombre as categoria_nombre, u.nombre_completo as vendedor_nombre
             FROM productos p
@@ -179,15 +186,15 @@ def api_producto_detalle(producto_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-# =============================
+# ====================================================
 # CATEGORÍAS
-# =============================
+# ====================================================
 @api_bp.route('/api/categorias', methods=['GET'])
 def api_categorias():
     try:
-        cursor = current_app.db.connection.cursor()
+        cursor = current_app.db.connection.cursor(dictionary=True)
         cursor.execute("""
-            SELECT c.*, COUNT(p.id_producto) as total_productos
+            SELECT c.*, COUNT(p.id_producto) AS total_productos
             FROM categorias c
             LEFT JOIN productos p ON c.id_categoria = p.id_categoria AND p.disponible = 1
             GROUP BY c.id_categoria
@@ -200,9 +207,9 @@ def api_categorias():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-# =============================
+# ====================================================
 # BÚSQUEDA GLOBAL
-# =============================
+# ====================================================
 @api_bp.route('/api/buscar', methods=['GET'])
 def api_buscar():
     try:
@@ -212,10 +219,10 @@ def api_buscar():
         if not query or len(query) < 2:
             return jsonify({'success': False, 'error': 'La búsqueda debe tener al menos 2 caracteres'}), 400
 
-        cursor = current_app.db.connection.cursor()
+        cursor = current_app.db.connection.cursor(dictionary=True)
         cursor.execute("""
             SELECT p.id_producto, p.nombre, p.precio, p.descripcion, p.imagen,
-                   c.nombre as categoria_nombre
+                   c.nombre AS categoria_nombre
             FROM productos p
             LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
             WHERE p.disponible = 1 AND (p.nombre LIKE %s OR p.descripcion LIKE %s)
@@ -229,22 +236,22 @@ def api_buscar():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-# =============================
+# ====================================================
 # ESTADÍSTICAS ADMIN
-# =============================
+# ====================================================
 @api_bp.route('/api/admin/stats', methods=['GET'])
 @login_required
 @admin_required
 def api_admin_stats():
     try:
-        cursor = current_app.db.connection.cursor()
-        cursor.execute("SELECT COUNT(*) as total FROM usuarios")
+        cursor = current_app.db.connection.cursor(dictionary=True)
+        cursor.execute("SELECT COUNT(*) AS total FROM usuarios")
         total_usuarios = cursor.fetchone()['total']
-        cursor.execute("SELECT COUNT(*) as total FROM productos WHERE disponible = 1")
+        cursor.execute("SELECT COUNT(*) AS total FROM productos WHERE disponible = 1")
         total_productos = cursor.fetchone()['total']
-        cursor.execute("SELECT COUNT(*) as total FROM pedidos")
+        cursor.execute("SELECT COUNT(*) AS total FROM pedidos")
         total_pedidos = cursor.fetchone()['total']
-        cursor.execute("SELECT COUNT(*) as total FROM pedidos WHERE estado = 'pendiente'")
+        cursor.execute("SELECT COUNT(*) AS total FROM pedidos WHERE estado = 'pendiente'")
         pedidos_pendientes = cursor.fetchone()['total']
         cursor.close()
 
@@ -258,11 +265,14 @@ def api_admin_stats():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-# =============================
+# ====================================================
 # EVENTOS (CALENDARIO)
-# =============================
+# ====================================================
 @api_bp.route('/api/eventos')
 @login_required
 def api_eventos():
-    eventos = ModelCalendario.get_all(current_app.db, current_user.id)
-    return jsonify(eventos)
+    try:
+        eventos = ModelCalendario.get_all(current_app.db, current_user.id)
+        return jsonify(eventos), 200
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
